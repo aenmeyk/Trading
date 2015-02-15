@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace HistoricalPriceExtractor.Persistance
+﻿namespace HistoricalPriceExtractor.Persistance
 {
     public interface IPersister
     {
