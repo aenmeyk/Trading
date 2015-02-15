@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Common;
 using HistoricalPriceExtractor.Persistance;
 
 namespace HistoricalPriceExtractor
@@ -10,8 +11,8 @@ namespace HistoricalPriceExtractor
         {
             var symbolProvider = new SymbolProvider();
             var extractor = new Extractor(Constants.QUOTE_URL);
-            var filePersister = new FilePersister(Constants.PERSISTANCE_PATH);
-            var sqlPersister = new SqlPersister(Constants.CONNECTION_STRING);
+            var filePersister = new FilePersister(CommonConstants.PERSISTANCE_PATH);
+            var sqlPersister = new SqlPersister(CommonConstants.CONNECTION_STRING);
             var symbols = symbolProvider.GetSymbols();
 
             foreach(var symbol in symbols)
@@ -25,6 +26,7 @@ namespace HistoricalPriceExtractor
 
             sqlPersister.Dispose();
             Console.WriteLine("Done");
+            Console.ReadLine();
         }
     }
 }

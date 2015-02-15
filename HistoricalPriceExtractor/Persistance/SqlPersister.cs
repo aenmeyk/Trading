@@ -61,7 +61,7 @@ namespace HistoricalPriceExtractor.Persistance
             newDataTable.Columns.Add("HighPrice", Type.GetType(typeName: "System.Decimal"));
             newDataTable.Columns.Add("LowPrice", Type.GetType(typeName: "System.Decimal"));
             newDataTable.Columns.Add("ClosePrice", Type.GetType(typeName: "System.Decimal"));
-            newDataTable.Columns.Add("Volume", Type.GetType(typeName: "System.Int32"));
+            newDataTable.Columns.Add("Volume", Type.GetType(typeName: "System.Int64"));
             newDataTable.Columns.Add("AdjustedClosePrice", Type.GetType(typeName: "System.Decimal"));
 
             foreach (DataRow dataRow in dataTable.Rows)

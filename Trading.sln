@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.22310.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalPriceExtractor", "HistoricalPriceExtractor\HistoricalPriceExtractor.csproj", "{CE9305F2-117B-4F7B-AB3A-1B96347F5BA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradeSimulator", "TradeSimulator\TradeSimulator.csproj", "{EE255AEB-CCED-4EC1-9427-7077B5687122}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{3E5449D5-9126-427B-97FD-46D3D53C2967}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{CE9305F2-117B-4F7B-AB3A-1B96347F5BA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE9305F2-117B-4F7B-AB3A-1B96347F5BA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE9305F2-117B-4F7B-AB3A-1B96347F5BA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE255AEB-CCED-4EC1-9427-7077B5687122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE255AEB-CCED-4EC1-9427-7077B5687122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE255AEB-CCED-4EC1-9427-7077B5687122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE255AEB-CCED-4EC1-9427-7077B5687122}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E5449D5-9126-427B-97FD-46D3D53C2967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E5449D5-9126-427B-97FD-46D3D53C2967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E5449D5-9126-427B-97FD-46D3D53C2967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E5449D5-9126-427B-97FD-46D3D53C2967}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
