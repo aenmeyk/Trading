@@ -15,14 +15,14 @@ namespace HistoricalPriceExtractor
             _httpClient = new HttpClient();
         }
 
-        public async Task<Stream> GetHistoricalPrices(string ticker)
+        public async Task<string> GetHistoricalPrices(string symbol)
         {
-            var url = string.Format(Constants.QUOTE_URL, ticker);
+            var url = string.Format(Constants.QUOTE_URL, symbol);
 
             var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
-            var priceStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            var historicalPrices = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            return priceStream;
+            return historicalPrices;
         }
     }
 }

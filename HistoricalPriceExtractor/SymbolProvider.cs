@@ -5,25 +5,25 @@ using System.Reflection;
 
 namespace HistoricalPriceExtractor
 {
-    public class TickerProvider
+    public class SymbolProvider
     {
-        public IEnumerable<string> GetTickers()
+        public IEnumerable<string> GetSymbols()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "HistoricalPriceExtractor.Tickers.txt";
-            string tickerString;
+            var resourceName = "HistoricalPriceExtractor.Symbols.txt";
+            string symbolString;
 
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    tickerString = reader.ReadToEnd();
+                    symbolString = reader.ReadToEnd();
                 }
             }
 
-            var tickers = tickerString.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var symbols = symbolString.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
-            return tickers;
+            return symbols;
         }
     }
 }

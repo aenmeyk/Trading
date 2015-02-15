@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GenericParsing">
+      <HintPath>..\GenericParser_bin\GenericParsing.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
@@ -46,18 +49,19 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="Extractor.cs" />
+    <Compile Include="Persistance\SqlPersister.cs" />
     <Compile Include="Persistance\IPersister.cs" />
     <Compile Include="Persistance\FilePersister.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TickerProvider.cs" />
+    <Compile Include="SymbolProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Tickers.txt" />
+    <EmbeddedResource Include="Symbols.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

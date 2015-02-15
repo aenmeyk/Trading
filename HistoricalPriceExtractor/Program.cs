@@ -8,19 +8,22 @@ namespace HistoricalPriceExtractor
     {
         static void Main(string[] args)
         {
-            var tickerProvider = new TickerProvider();
+            var symbolProvider = new SymbolProvider();
             var extractor = new Extractor(Constants.QUOTE_URL);
-            var persister = new FilePersister(Constants.PERSISTANCE_PATH);
-            var tickers = tickerProvider.GetTickers();
+            var filePersister = new FilePersister(Constants.PERSISTANCE_PATH);
+            var sqlPersister = new SqlPersister(Constants.CONNECTION_STRING);
+            var symbols = symbolProvider.GetSymbols();
 
-            foreach(var ticker in tickers)
+            foreach(var symbol in symbols)
             {
-                Console.WriteLine("Getting historical prices for: {0}", ticker);
-                var priceStream = extractor.GetHistoricalPrices(ticker).Result;
-                persister.Persist(ticker, priceStream);
+                Console.WriteLine("Getting historical prices for: {0}", symbol);
+                var priceStream = extractor.GetHistoricalPrices(symbol).Result;
+                filePersister.Persist(symbol, priceStream);
+                sqlPersister.Persist(symbol, priceStream);
                 Thread.Sleep(Constants.REQUEST_DELAY_MILLISECONDS);
             }
 
+            sqlPersister.Dispose();
             Console.WriteLine("Done");
         }
     }

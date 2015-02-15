@@ -4,6 +4,6 @@ namespace HistoricalPriceExtractor.Persistance
 {
     public interface IPersister
     {
-        void Persist(string ticker, Stream priceStream);
+        void Persist(string symbol, string historicalPrices);
     }
 }

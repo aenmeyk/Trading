@@ -11,15 +11,10 @@ namespace HistoricalPriceExtractor.Persistance
             _path = path;
         }
 
-        public void Persist(string ticker, Stream priceStream)
+        public void Persist(string symbol, string historicalPrices)
         {
-            var path = string.Format(_path, ticker);
-
-            using (var fileStream = File.Create(path))
-            {
-                priceStream.Seek(0, SeekOrigin.Begin);
-                priceStream.CopyTo(fileStream);
-            }
+            var path = string.Format(_path, symbol);
+            File.WriteAllText(path, historicalPrices);
         }
     }
 }
