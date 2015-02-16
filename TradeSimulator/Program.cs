@@ -8,10 +8,11 @@ namespace TradeSimulator
     {
         static void Main(string[] args)
         {
-            Console.BufferHeight = 2000;
-            var strategy = new MovementFromYesterday(CommonConstants.CONNECTION_STRING);
+            //var strategy = new MovementFromYesterday(CommonConstants.CONNECTION_STRING);
+            var strategy = new NeuralNetwork();
             strategy.Run();
 
+            Console.WriteLine("Done");
             Console.ReadLine();
         }
     }
