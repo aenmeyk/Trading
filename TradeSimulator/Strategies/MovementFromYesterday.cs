@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Common.Models;
 using Dapper;
 
@@ -13,112 +14,22 @@ namespace TradeSimulator.Strategies
     {
         //private IEnumerable<string> _symbols = new[] { "SCHX", "SCHM", "SCHA", "SCHF", "XLG", "WMCR", "DEF", "SCHE", "FEU", "MDD", "BIK", "PAF" };
         private IEnumerable<string> _symbols = new[] {
-"ACIM",
-"BIK",
-"CQQQ",
-"CSM",
-"CVY",
-"CWI",
-"DEF",
-"DGRE",
-"DGRS",
-"DGRW",
-"DNL",
-"DRW",
-"DWAS",
-"DWX",
-"EDIV",
-"EDOG",
-"EEB",
-"EELV",
-"EMBB",
-"EWEM",
-"EWRS",
-"EWX",
-"FEU",
-"FNDA",
-"FNDB",
-"FNDC",
-"FNDE",
-"FNDF",
-"FNDX",
-"FRN",
-"GAF",
-"GAL",
-"GMF",
-"GML",
-"GXC",
-"HAO",
-"HGI",
-"IBLN",
-"IDLV",
-"IDOG",
-"IHDG",
-"INKM",
-"JPP",
-"KNOW",
-"LOWC",
-"MDD",
-"MDYG",
-"MDYV",
-"NOBL",
-"PAF",
-"PDP",
-"PID",
-"PIE",
-"PIN",
-"PIZ",
-"PKW",
-"PXMC",
-"PXSV",
-"QAUS",
-"QCAN",
-"QDEU",
-"QESP",
-"QGBR",
-"QJPN",
-"QKOR",
-"QMEX",
-"QQQE",
-"QTWN",
-"RFG",
-"RFV",
-"RLY",
-"RPG",
-"RPV",
-"RSCO",
-"RSP",
-"RWO",
-"RZG",
-"RZV",
-"SCHA",
-"SCHB",
-"SCHC",
-"SCHD",
-"SCHE",
-"SCHF",
-"SCHG",
-"SCHH",
-"SCHM",
-"SCHV",
 "SCHX",
-"SDOG",
-"SLYG",
-"SLYV",
-"SPHB",
-"SPLV",
-"SYE",
-"SYG",
-"SYV",
-"TOLZ",
-"VSPY",
-"WDIV",
-"WMCR",
-"XLG",
-"YAO" };
+"SCHM",
+"SCHA",
+"SCHF",
+"SCHE",
+"SCHH",
+"SCHG",
+"SCHV",
+"PIN",
+"GXC",
+"GMF",
+"FEU"
+};
 
         private string _connectionString;
-        private Dictionary<string, IEnumerable<Quote>> _quotes = new Dictionary<string, IEnumerable<Quote>>();
+        private Dictionary<string, Dictionary<DateTime, Quote>> _quotes = new Dictionary<string, Dictionary<DateTime, Quote>>();
         private Account _account = new Account(Constants.OPENING_BALANCE);
         IEnumerable<Quote> _sp500Quotes;
 
@@ -138,7 +49,7 @@ namespace TradeSimulator.Strategies
 
         private void GetQuotes()
         {
-            var queryText = "SELECT Symbol, DateValue, AdjustedClosePrice, Volume FROM dbo.PriceHistory WHERE Symbol = @Symbol";
+            var queryText = "SELECT Symbol, DateValue, HighPrice, LowPrice, ClosePrice, AdjustedClosePrice, Volume FROM dbo.PriceHistory WHERE Symbol = @Symbol";
             var currentMinDate = DateTime.MaxValue;
 
             using (var sqlConnection = new SqlConnection(_connectionString))
@@ -149,7 +60,8 @@ namespace TradeSimulator.Strategies
                 foreach (var symbol in _symbols)
                 {
                     var quotes = sqlConnection.Query<Quote>(queryText, new { Symbol = symbol });
-                    _quotes.Add(symbol, quotes);
+                    var quoteDictionary = quotes.ToDictionary(x => x.DateValue);
+                    _quotes.Add(symbol, quoteDictionary);
 
                     var minDate = quotes.Min(x => x.DateValue);
 
@@ -165,25 +77,24 @@ namespace TradeSimulator.Strategies
         private void RunStrategy()
         {
             var dateRange = _quotes[_masterSymbol]
-                .Select(x => x.DateValue)
+                .Select(x => x.Key)
                 .Where(x => x >= Constants.START_DATE && x <= Constants.END_DATE)
                 .OrderBy(x => x);
 
-            DateTime? previousDate = null;
+            DateTime previousDate = DateTime.MinValue;
             var currentQuotes = new Collection<Quote>();
 
             foreach (var currentDate in dateRange)
             {
-                if (previousDate != null)
+                if ((currentDate - _account.TransactionDate).TotalDays >= Constants.UNSETTLED_FUNDS_DAYS && previousDate != DateTime.MinValue)
                 {
                     foreach (var quotes in _quotes.Values)
                     {
-                        var previousQuote = quotes.SingleOrDefault(x => x.DateValue == previousDate);
-
-                        if (previousQuote != null)
+                        if (quotes.ContainsKey(previousDate))
                         {
+                            var previousQuote = quotes[previousDate];
                             var previousPrice = previousQuote.AdjustedClosePrice;
-                            var quote = quotes.SingleOrDefault(x => x.DateValue == currentDate);
+                            var quote = quotes[currentDate];
 
                             if (quote != null)
                             {
@@ -193,12 +104,15 @@ namespace TradeSimulator.Strategies
                         }
                     }
 
-                    Trade(currentQuotes);
-                    Debug.WriteLine("{0}\t{1}\t{2}", currentDate.ToShortDateString(), _account.CurrentSymbol, _account.TotalBalance);
+                    if (currentQuotes.Count > 0)
+                    {
+                        Trade(currentQuotes);
+                        currentQuotes.Clear();
+                    }
                 }
 
-                currentQuotes.Clear();
-                previousDate = currentDate;
+                Debug.WriteLine("{0}\t{1}\t{2}", currentDate.ToShortDateString(), _account.CurrentSymbol, _account.TotalBalance);
+                previousDate = currentDate;//.AddDays(-Constants.UNSETTLED_FUNDS_DAYS);
             }
 
             PrintResults(dateRange);
@@ -206,18 +120,30 @@ namespace TradeSimulator.Strategies
 
         private void Trade(Collection<Quote> currentQuotes)
         {
-            var newQuote = currentQuotes.First(x => x.Growth == currentQuotes.Min(y => y.Growth));
+            var quoteToBuy = currentQuotes.First(x => x.Growth == currentQuotes.Min(y => y.Growth));
+
+            var existingQuote = currentQuotes.FirstOrDefault(x => x.Symbol == _account.CurrentSymbol);
+
+            if (existingQuote != null && existingQuote.Growth <= quoteToBuy.Growth * 1.01M)
+            {
+                quoteToBuy = existingQuote;
+            }
 
             // Only change the trade if we are moving to a different stock.
-            if (newQuote.Symbol != _account.CurrentSymbol)
+            if (quoteToBuy.Symbol != _account.CurrentSymbol)
             {
                 if (_account.CurrentStockQuantity > 0)
                 {
-                    var existingStockPrice = currentQuotes.Single(x => x.Symbol == _account.CurrentSymbol).AdjustedClosePrice;
-                    _account.Sell(existingStockPrice);
+                    var quoteForCurrentStock = currentQuotes.SingleOrDefault(x => x.Symbol == _account.CurrentSymbol);
+
+                    var currentStockPrice = quoteForCurrentStock != null
+                        ? quoteForCurrentStock.AdjustedClosePrice
+                        : _account.PurchasePrice;
+
+                    _account.Sell(currentStockPrice);
                 }
 
-                _account.Buy(newQuote.Symbol, newQuote.AdjustedClosePrice);
+                _account.Buy(quoteToBuy);
             }
         }
 
@@ -248,6 +174,15 @@ namespace TradeSimulator.Strategies
             var annualGrowthPercent = annualGrowth * 100;
 
             return Math.Round(annualGrowthPercent, 2);
+        }
+
+        private DateTime _startTime = DateTime.Now;
+        private DateTime _lastTime = DateTime.Now;
+
+        private void RecordTime([CallerLineNumber] int lineNumber = 0)
+        {
+            Debug.WriteLine("{0}: {1}\t\t{2}", lineNumber, (DateTime.Now - _startTime).TotalMilliseconds, (DateTime.Now - _lastTime).TotalMilliseconds);
+            _lastTime = DateTime.Now;
         }
     }
 }

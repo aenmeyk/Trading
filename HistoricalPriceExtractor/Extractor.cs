@@ -16,7 +16,7 @@ namespace HistoricalPriceExtractor
 
         public async Task<string> GetHistoricalPrices(string symbol)
         {
-            var url = string.Format(Constants.QUOTE_URL, symbol);
+            var url = string.Format(_quoteUrl, symbol);
 
             var response = await _httpClient.GetAsync(url).ConfigureAwait(false);
             var historicalPrices = await response.Content.ReadAsStringAsync().ConfigureAwait(false);

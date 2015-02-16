@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using GenericParsing;
 
 namespace HistoricalPriceExtractor.Persistance
@@ -10,11 +12,13 @@ namespace HistoricalPriceExtractor.Persistance
     {
         private bool disposed = false;
         private string _connectionString;
+        private string _tableName;
         private SqlConnection _sqlConnection;
 
-        public SqlPersister(string connectionString)
+        public SqlPersister(string connectionString, string tableName)
         {
             _connectionString = connectionString;
+            _tableName = tableName;
             _sqlConnection = new SqlConnection(connectionString);
             _sqlConnection.Open();
         }
@@ -27,7 +31,7 @@ namespace HistoricalPriceExtractor.Persistance
 
         private void DeleteExistingHistoricalPrices(string symbol)
         {
-            var commandText = string.Format("DELETE FROM [dbo].[PriceHistory] WHERE Symbol = '{0}'", symbol);
+            var commandText = string.Format("DELETE FROM {0} WHERE Symbol = '{1}'", _tableName, symbol);
 
             using (var command = new SqlCommand(commandText, _sqlConnection))
             {
@@ -37,6 +41,7 @@ namespace HistoricalPriceExtractor.Persistance
 
         private void InsertHistoricalPrices(string symbol, string historicalPrices)
         {
+            historicalPrices = historicalPrices.Replace(",-", ",");
             var reader = new StringReader(historicalPrices);
 
             using (var parser = new GenericParserAdapter(reader))
@@ -47,7 +52,7 @@ namespace HistoricalPriceExtractor.Persistance
 
                 using (var bulkCopy = new SqlBulkCopy(_connectionString, SqlBulkCopyOptions.Default))
                 {
-                    bulkCopy.DestinationTableName = "PriceHistory";
+                    bulkCopy.DestinationTableName = _tableName;
                     bulkCopy.WriteToServer(formattedDataTable);
                 }
             }
@@ -55,18 +60,34 @@ namespace HistoricalPriceExtractor.Persistance
 
         private DataTable FormatDataTable(DataTable dataTable, string symbol)
         {
-            var newDataTable = new DataTable();
-            newDataTable.Columns.Add("DateValue", Type.GetType(typeName: "System.DateTime"));
-            newDataTable.Columns.Add("OpenPrice", Type.GetType(typeName: "System.Decimal"));
-            newDataTable.Columns.Add("HighPrice", Type.GetType(typeName: "System.Decimal"));
-            newDataTable.Columns.Add("LowPrice", Type.GetType(typeName: "System.Decimal"));
-            newDataTable.Columns.Add("ClosePrice", Type.GetType(typeName: "System.Decimal"));
-            newDataTable.Columns.Add("Volume", Type.GetType(typeName: "System.Int64"));
-            newDataTable.Columns.Add("AdjustedClosePrice", Type.GetType(typeName: "System.Decimal"));
+            var newDataTable = new DataTable
+            {
+                Columns =
+                {
+                    new DataColumn("DateValue", typeof(DateTime)),
+                    new DataColumn("OpenPrice", typeof(decimal)) { AllowDBNull = true},
+                    new DataColumn("HighPrice", typeof(decimal)) { AllowDBNull = true},
+                    new DataColumn("LowPrice", typeof(decimal)) { AllowDBNull = true},
+                    new DataColumn("ClosePrice", typeof(decimal)) { AllowDBNull = true},
+                    new DataColumn("Volume", typeof(long)) { AllowDBNull = true},
+                    new DataColumn("AdjustedClosePrice", typeof(decimal)) { AllowDBNull = true},
+                }
+            };
 
             foreach (DataRow dataRow in dataTable.Rows)
             {
-                newDataTable.Rows.Add(dataRow.ItemArray);
+                var items = new Collection<object>();
+
+                foreach(var item in dataRow.ItemArray)
+                {
+                    var itemToAdd = string.IsNullOrWhiteSpace(item.ToString())
+                        ? DBNull.Value
+                        : item;
+
+                    items.Add(itemToAdd);
+                }
+
+                newDataTable.Rows.Add(items.ToArray());
             }
 
             var symbolColumn = newDataTable.Columns.Add("Symbol", Type.GetType(typeName: "System.String"));

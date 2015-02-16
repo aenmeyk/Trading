@@ -10,21 +10,34 @@ namespace HistoricalPriceExtractor
         static void Main(string[] args)
         {
             var symbolProvider = new SymbolProvider();
-            var extractor = new Extractor(Constants.QUOTE_URL);
+            //  var yahooExtractor = new Extractor(Constants.YAHOO_QUOTE_URL);
+            var googleExtractor = new Extractor(Constants.GOOGLE_QUOTE_URL);
             var filePersister = new FilePersister(CommonConstants.PERSISTANCE_PATH);
-            var sqlPersister = new SqlPersister(CommonConstants.CONNECTION_STRING);
+            // var yahooPersister = new SqlPersister(CommonConstants.CONNECTION_STRING, "PriceHistory");
+            var googlePersister = new SqlPersister(CommonConstants.CONNECTION_STRING, "PriceHistoryGoogle");
             var symbols = symbolProvider.GetSymbols();
 
-            foreach(var symbol in symbols)
+            foreach (var symbol in symbols)
             {
-                Console.WriteLine("Getting historical prices for: {0}", symbol);
-                var priceStream = extractor.GetHistoricalPrices(symbol).Result;
-                filePersister.Persist(symbol, priceStream);
-                sqlPersister.Persist(symbol, priceStream);
+                try
+                {
+                    Console.WriteLine("Getting historical prices for: {0}", symbol);
+                    // var yahooPrices = yahooExtractor.GetHistoricalPrices(symbol).Result;
+                    var googlePrices = googleExtractor.GetHistoricalPrices(symbol).Result;
+                    // filePersister.Persist(symbol, yahooPrices);
+                    //yahooPersister.Persist(symbol, yahooPrices);
+                    googlePersister.Persist(symbol, googlePrices);
+                }
+                catch
+                {
+                    Console.WriteLine("Bad Symbol: {0}", symbol);
+                }
+
                 Thread.Sleep(Constants.REQUEST_DELAY_MILLISECONDS);
             }
 
-            sqlPersister.Dispose();
+            //yahooPersister.Dispose();
+            googlePersister.Dispose();
             Console.WriteLine("Done");
             Console.ReadLine();
         }
