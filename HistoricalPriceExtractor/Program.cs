@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Common;
+using DataAccess.Repositories;
 using HistoricalPriceExtractor.Persistance;
 
 namespace HistoricalPriceExtractor
@@ -13,8 +14,8 @@ namespace HistoricalPriceExtractor
             var yahooExtractor = new Extractor(Constants.YAHOO_QUOTE_URL);
             var googleExtractor = new Extractor(Constants.GOOGLE_QUOTE_URL);
             var filePersister = new FilePersister(CommonConstants.PERSISTANCE_PATH);
-            var yahooPersister = new SqlPersister(CommonConstants.CONNECTION_STRING, "PriceHistory");
-            var googlePersister = new SqlPersister(CommonConstants.CONNECTION_STRING, "PriceHistoryGoogle");
+            var yahooPersister = new SqlPersister(new HistoricalPricesYahooRepository());
+            var googlePersister = new SqlPersister(new HistoricalPricesGoogleRepository());
             var symbols = symbolProvider.GetSymbols();
 
             foreach (var symbol in symbols)
@@ -45,8 +46,6 @@ namespace HistoricalPriceExtractor
                 Thread.Sleep(Constants.REQUEST_DELAY_MILLISECONDS);
             }
 
-            yahooPersister.Dispose();
-            googlePersister.Dispose();
             Console.WriteLine("Done");
             Console.ReadLine();
         }

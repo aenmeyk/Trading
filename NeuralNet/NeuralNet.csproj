@@ -40,7 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core.cs" />
-    <Compile Include="DataTable.cs" />
     <Compile Include="Network.cs" />
     <Compile Include="NetworkManager.cs" />
     <Compile Include="Constants.cs" />
