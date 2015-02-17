@@ -1,15 +1,22 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace NeuralNet
 {
     public static class NetworkManager
     {
-        private static Network _trainingNetwork = new Network();
-        private static Network _testingNetwork = new Network(testNetwork: true);
+        private static Network _trainingNetwork ;
+        private static Network _testingNetwork;
 
-        public static void InitializeNetwork()
+        public static void InitializeNetwork(double[][] trainingInputValues, double[] trainingOutputValues, double[][] testingInputValues)
         {
+            NetworkSettings.InputNeurons = trainingInputValues[0].Count();
+            NetworkSettings.HiddenNeurons = NetworkSettings.InputNeurons;
+
+            _trainingNetwork = new Network(trainingInputValues, trainingOutputValues);
+            _testingNetwork = new Network(testingInputValues);
+
             Core.PopulateWeights();
         }
 
@@ -39,7 +46,7 @@ namespace NeuralNet
 
             foreach (var outputValue in _testingNetwork.OutputOutput)
             {
-                Console.WriteLine(outputValue);
+                Debug.WriteLine(outputValue);
             }
         }
     }

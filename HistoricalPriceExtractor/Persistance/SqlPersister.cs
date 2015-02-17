@@ -4,9 +4,9 @@ namespace HistoricalPriceExtractor.Persistance
 {
     public class SqlPersister : IPersister
     {
-        private HistoricalPricesRepositoryBase _repository;
+        private PriceHistoryRepositoryBase _repository;
 
-        public SqlPersister(HistoricalPricesRepositoryBase repository)
+        public SqlPersister(PriceHistoryRepositoryBase repository)
         {
             _repository = repository;
         }

@@ -14,8 +14,8 @@ namespace HistoricalPriceExtractor
             var yahooExtractor = new Extractor(Constants.YAHOO_QUOTE_URL);
             var googleExtractor = new Extractor(Constants.GOOGLE_QUOTE_URL);
             var filePersister = new FilePersister(CommonConstants.PERSISTANCE_PATH);
-            var yahooPersister = new SqlPersister(new HistoricalPricesYahooRepository());
-            var googlePersister = new SqlPersister(new HistoricalPricesGoogleRepository());
+            var yahooPersister = new SqlPersister(new PriceHistoryYahooRepository());
+            var googlePersister = new SqlPersister(new PriceHistoryGoogleRepository());
             var symbols = symbolProvider.GetSymbols();
 
             foreach (var symbol in symbols)

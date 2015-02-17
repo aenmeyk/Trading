@@ -8,7 +8,7 @@ using GenericParsing;
 
 namespace DataAccess.Repositories
 {
-    public abstract class HistoricalPricesRepositoryBase : RepositoryBase
+    public abstract class PriceHistoryRepositoryBase : RepositoryBase
     {
         public void PersistHistoricalPrices(string symbol, string historicalPrices)
         {
@@ -67,7 +67,7 @@ namespace DataAccess.Repositories
                 newDataTable.Rows.Add(items.ToArray());
             }
 
-            var symbolColumn = newDataTable.Columns.Add("Symbol", Type.GetType(typeName: "System.String"));
+            var symbolColumn = newDataTable.Columns.Add("Symbol", typeof(string));
 
             foreach (DataRow dataRow in newDataTable.Rows)
             {

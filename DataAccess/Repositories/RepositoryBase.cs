@@ -11,7 +11,7 @@ namespace DataAccess.Repositories
 
         public void DeleteForSymbol(string symbol)
         {
-            var commandText = string.Format("DELETE FROM dbo.{0} WHERE Symbol = '{1}'", TableName, symbol);
+            var commandText = string.Format("DELETE FROM {0} WHERE Symbol = '{1}'", TableName, symbol);
 
             using (var sqlConnection = new SqlConnection(ConnectionString))
             {
@@ -26,12 +26,23 @@ namespace DataAccess.Repositories
 
         public IEnumerable<T> GetForSymbol<T>(string symbol)
         {
-            var queryText = string.Format("SELECT * FROM [dbo].[{0}] WHERE Symbol = @Symbol", TableName);
+            var queryText = string.Format("SELECT * FROM {0} WHERE Symbol = @Symbol", TableName);
 
             using (var sqlConnection = new SqlConnection(ConnectionString))
             {
                 sqlConnection.Open();
                 return sqlConnection.Query<T>(queryText, new { Symbol = symbol });
+            }
+        }
+
+        public IEnumerable<T> Get<T>()
+        {
+            var queryText = string.Format("SELECT * FROM {0}", TableName);
+
+            using (var sqlConnection = new SqlConnection(ConnectionString))
+            {
+                sqlConnection.Open();
+                return sqlConnection.Query<T>(queryText);
             }
         }
     }

@@ -27,7 +27,7 @@ namespace TradeSimulator.Strategies
 "FEU"
 };
 
-        private HistoricalPricesRepositoryBase _repository;
+        private PriceHistoryRepositoryBase _repository;
         private Dictionary<string, Dictionary<DateTime, Quote>> _quotes = new Dictionary<string, Dictionary<DateTime, Quote>>();
         private Account _account = new Account(Constants.OPENING_BALANCE);
         IEnumerable<Quote> _sp500Quotes;
@@ -37,7 +37,7 @@ namespace TradeSimulator.Strategies
 
         public MovementFromYesterday()
         {
-            _repository = new HistoricalPricesYahooRepository();
+            _repository = new PriceHistoryYahooRepository();
         }
 
         public void Run()
