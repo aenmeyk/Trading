@@ -5,7 +5,7 @@ namespace NeuralNet
     public static class NetworkSettings
     {
         public static int InputNeurons = 3;
-        public static int HiddenNeurons = 2;
+        public static int HiddenNeurons = 3;
         public static int PredictionDaysAhead = 1;
     }
 
