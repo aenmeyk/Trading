@@ -8,8 +8,8 @@ namespace TradeSimulator
     {
         static void Main(string[] args)
         {
-            //var strategy = new MovementFromYesterday(CommonConstants.CONNECTION_STRING);
-            var strategy = new NeuralNetwork();
+            var strategy = new MovementFromYesterday();
+            // var strategy = new NeuralNetwork();
             strategy.Run();
 
             Console.WriteLine("Done");

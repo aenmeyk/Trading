@@ -1,4 +1,6 @@
-﻿using System.Data.SqlClient;
+﻿using System.Collections.Generic;
+using System.Data.SqlClient;
+using Dapper;
 
 namespace DataAccess.Repositories
 {
@@ -19,6 +21,17 @@ namespace DataAccess.Repositories
                 {
                     command.ExecuteNonQuery();
                 }
+            }
+        }
+
+        public IEnumerable<T> GetForSymbol<T>(string symbol)
+        {
+            var queryText = string.Format("SELECT * FROM [dbo].[{0}] WHERE Symbol = @Symbol", TableName);
+
+            using (var sqlConnection = new SqlConnection(ConnectionString))
+            {
+                sqlConnection.Open();
+                return sqlConnection.Query<T>(queryText, new { Symbol = symbol });
             }
         }
     }

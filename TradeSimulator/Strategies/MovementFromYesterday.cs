@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Common.Models;
-using Dapper;
+using DataAccess.Repositories;
 
 namespace TradeSimulator.Strategies
 {
@@ -28,7 +27,7 @@ namespace TradeSimulator.Strategies
 "FEU"
 };
 
-        private string _connectionString;
+        private HistoricalPricesRepositoryBase _repository;
         private Dictionary<string, Dictionary<DateTime, Quote>> _quotes = new Dictionary<string, Dictionary<DateTime, Quote>>();
         private Account _account = new Account(Constants.OPENING_BALANCE);
         IEnumerable<Quote> _sp500Quotes;
@@ -36,9 +35,9 @@ namespace TradeSimulator.Strategies
         // The simulation will run based on the date range for this symbol
         private string _masterSymbol;
 
-        public MovementFromYesterday(string connectionString)
+        public MovementFromYesterday()
         {
-            _connectionString = connectionString;
+            _repository = new HistoricalPricesYahooRepository();
         }
 
         public void Run()
@@ -52,14 +51,11 @@ namespace TradeSimulator.Strategies
             var queryText = "SELECT Symbol, DateValue, HighPrice, LowPrice, ClosePrice, AdjustedClosePrice, Volume FROM dbo.PriceHistory WHERE Symbol = @Symbol";
             var currentMinDate = DateTime.MaxValue;
 
-            using (var sqlConnection = new SqlConnection(_connectionString))
-            {
-                sqlConnection.Open();
-                _sp500Quotes = sqlConnection.Query<Quote>(queryText, new { Symbol = "^GSPC" });
+                _sp500Quotes = _repository.GetForSymbol<Quote>("^GSPC");
 
                 foreach (var symbol in _symbols)
                 {
-                    var quotes = sqlConnection.Query<Quote>(queryText, new { Symbol = symbol });
+                    var quotes = _repository.GetForSymbol<Quote>(symbol);
                     var quoteDictionary = quotes.ToDictionary(x => x.DateValue);
                     _quotes.Add(symbol, quoteDictionary);
 
@@ -71,7 +67,6 @@ namespace TradeSimulator.Strategies
                         _masterSymbol = symbol;
                     }
                 }
-            }
         }
 
         private void RunStrategy()

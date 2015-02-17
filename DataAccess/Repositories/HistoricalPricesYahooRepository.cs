@@ -4,7 +4,7 @@
     {
         protected override string TableName
         {
-            get { return "HistoricalPrices"; }
+            get { return "PriceHistory"; }
         }
     }
 }
