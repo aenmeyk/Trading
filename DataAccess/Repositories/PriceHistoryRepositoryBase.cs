@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using Common.ExtensionMethods;
+using Dapper;
 using GenericParsing;
 
 namespace DataAccess.Repositories
@@ -14,6 +17,29 @@ namespace DataAccess.Repositories
         {
             DeleteForSymbol(symbol);
             InsertHistoricalPrices(symbol, historicalPrices);
+        }
+
+        public IEnumerable<T> GetForSymbolsAndDateRange<T>(IEnumerable<string> symbols, DateTime startDate, DateTime endDate)
+        {
+            const string sqlStructure = @"
+                SELECT Symbol, DateValue, AdjustedClosePrice, Volume 
+                FROM {0}
+                WHERE Symbol IN({1}) 
+                    AND DateValue BETWEEN '{2}' AND '{3}' 
+                ORDER BY DateValue";
+
+            var symbolText = string.Join(",", symbols.Select(x => string.Format("'{0}'", x)).ToArray());
+            var queryText = string.Format(sqlStructure
+                , TableName
+                , symbolText
+                , startDate.ToSqlString()
+                , endDate.ToSqlString());
+
+            using (var sqlConnection = new SqlConnection(ConnectionString))
+            {
+                sqlConnection.Open();
+                return sqlConnection.Query<T>(queryText);
+            }
         }
 
         public void InsertHistoricalPrices(string symbol, string historicalPrices)

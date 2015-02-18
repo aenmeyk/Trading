@@ -1,5 +1,4 @@
 ﻿using System;
-using TradeSimulator.Strategies;
 
 namespace TradeSimulator
 {
@@ -7,10 +6,10 @@ namespace TradeSimulator
     {
         static void Main(string[] args)
         {
-            // var strategy = new MovementFromYesterday();
-            var strategy = new NeuralNetwork();
-            strategy.Run();
+            var strategyRunner = new StrategyRunner();
+            strategyRunner.Run();
 
+            Console.WriteLine();
             Console.WriteLine("Done");
             Console.ReadLine();
         }

@@ -11,6 +11,5 @@ namespace Common.Models
         public decimal ClosePrice { get; set; }
         public decimal AdjustedClosePrice { get; set; }
         public long Volume { get; set; }
-        public decimal Growth { get; set; }
     }
 }

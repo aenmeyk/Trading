@@ -39,12 +39,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Account.cs" />
+    <Compile Include="Model\Account.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Model\Portfolio.cs" />
+    <Compile Include="Model\Position.cs" />
+    <Compile Include="Model\PurchaseRequest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Strategies\MovementFromYesterdayAllSymbols.cs" />
+    <Compile Include="Strategies\MovementFromYesterdayBase.cs" />
+    <Compile Include="Strategies\ActualAllocationBenchmark.cs" />
+    <Compile Include="Strategies\SP500Benchmark.cs" />
     <Compile Include="Strategies\MovementFromYesterday.cs" />
     <Compile Include="Strategies\NeuralNetwork.cs" />
+    <Compile Include="Strategies\StrategyBase.cs" />
+    <Compile Include="StrategyRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

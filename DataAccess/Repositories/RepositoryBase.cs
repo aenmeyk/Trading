@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using Dapper;
 
 namespace DataAccess.Repositories
@@ -24,14 +25,15 @@ namespace DataAccess.Repositories
             }
         }
 
-        public IEnumerable<T> GetForSymbol<T>(string symbol)
+        public IEnumerable<T> GetForSymbols<T>(IEnumerable<string> symbols)
         {
-            var queryText = string.Format("SELECT * FROM {0} WHERE Symbol = @Symbol", TableName);
+            var symbolText = string.Join(",", symbols.Select(x => string.Format("'{0}'", x)).ToArray());
+            var queryText = string.Format("SELECT * FROM {0} WHERE Symbol IN ({1})", TableName, symbolText);
 
             using (var sqlConnection = new SqlConnection(ConnectionString))
             {
                 sqlConnection.Open();
-                return sqlConnection.Query<T>(queryText, new { Symbol = symbol });
+                return sqlConnection.Query<T>(queryText);
             }
         }
 
