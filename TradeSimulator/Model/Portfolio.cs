@@ -15,10 +15,10 @@ namespace TradeSimulator.Model
         {
             _spread = spread;
             _tradingFee = tradingFee;
-            Positions = new Dictionary<string, Position>();
+            PositionDictionary = new Dictionary<string, Position>();
         }
 
-        public Dictionary<string, Position> Positions { get; private set; }
+        public Dictionary<string, Position> PositionDictionary { get; private set; }
 
         public decimal TotalValue
         {
@@ -26,11 +26,12 @@ namespace TradeSimulator.Model
             {
                 var portfolioValue = 0M;
 
-                foreach (var position in Positions.Values)
+                foreach (var position in PositionDictionary.Values)
                 {
-                    var spreadMultiplier = 1 - GetSpread(position.Symbol);
-                    var tradingFee = GetTradingFee(position.Symbol);
-                    portfolioValue += (position.CurrentValue * spreadMultiplier) - tradingFee;
+                    //var spreadMultiplier = 1 - GetSpread(position.Symbol);
+                    //var tradingFee = GetTradingFee(position.Symbol);
+                    //portfolioValue += (position.CurrentValue * spreadMultiplier) - tradingFee;
+                    portfolioValue += position.CurrentValue;
                 }
 
                 return portfolioValue;
@@ -39,7 +40,7 @@ namespace TradeSimulator.Model
 
         public decimal CostBasis
         {
-            get { return Positions.Sum(x => x.Value.CostBasis); }
+            get { return PositionDictionary.Sum(x => x.Value.CostBasis); }
         }
 
         public Position AddPosition(PurchaseRequest purchaseRequest, decimal cashAvailableForPurchase)
@@ -53,7 +54,7 @@ namespace TradeSimulator.Model
             if (quantity > 0)
             {
                 var position = new Position(purchaseRequest.Quote.Symbol, quantity, purchasePrice, tradingFee, purchaseRequest.Quote.DateValue);
-                Positions.Add(position.Symbol, position);
+                PositionDictionary.Add(position.Symbol, position);
                 return position;
             }
 
@@ -64,14 +65,22 @@ namespace TradeSimulator.Model
         {
             foreach (var quote in quotes)
             {
-                if (Positions.ContainsKey(quote.Symbol))
+                if (PositionDictionary.ContainsKey(quote.Symbol))
                 {
-                    var position = Positions[quote.Symbol];
+                    var position = PositionDictionary[quote.Symbol];
                     position.CurrentPrice = quote.AdjustedClosePrice;
                 }
             }
 
             _lastPortfolioUpdateDate = date;
+        }
+
+        public decimal GetPositionSaleValue(Position position)
+        {
+            var spreadMultiplier = 1 - GetSpread(position.Symbol);
+            var tradingFee = GetTradingFee(position.Symbol);
+
+            return (position.CurrentValue * spreadMultiplier) - tradingFee;
         }
 
         public void Liquidate(DateTime liquidationDate)
@@ -81,7 +90,7 @@ namespace TradeSimulator.Model
                 throw new Exception("Portfolio prices have note been updated.");
             }
 
-            Positions.Clear();
+            PositionDictionary.Clear();
         }
 
         private decimal GetSpread(string symbol)

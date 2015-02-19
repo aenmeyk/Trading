@@ -37,7 +37,7 @@ namespace TradeSimulator.Strategies
         {
             var selectedQuote = quotes.SingleOrDefault();
 
-            if (selectedQuote != null && !Account.Portfolio.Positions.Any())
+            if (selectedQuote != null && !Account.Portfolio.PositionDictionary.Any())
             {
                 var purchaseRequest = new PurchaseRequest { Quote = selectedQuote, Percent = 1 };
                 Account.Buy(new[] { purchaseRequest });

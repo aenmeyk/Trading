@@ -38,6 +38,8 @@ namespace TradeSimulator.Model
 
         public Portfolio Portfolio { get; private set; }
 
+        public string LoggingLevel { get; set; }
+
         public void Buy(IEnumerable<PurchaseRequest> purchaseRequests)
         {
             if (!purchaseRequests.Any())
@@ -56,27 +58,38 @@ namespace TradeSimulator.Model
                 if (position != null)
                 {
                     _cashBalance -= position.CostBasis;
-                }
 
-                //Debug.WriteLine("{0} \tBuy \t{1} \t{2} \t{3}"
-                //    , purchaseRequest.Quote.DateValue.ToShortDateString()
-                //    , purchaseRequest.Quote.Symbol
-                //    , position.CostBasis
-                //    , _totalValue);
+                    LogMessage("{0} \tBuy \t{1} \t{2} \t{3} \t{4} \t{5}"
+                        , purchaseRequest.Quote.DateValue.ToShortDateString()
+                        , purchaseRequest.Quote.Symbol
+                        , Math.Round(purchaseRequest.Quote.AdjustedClosePrice, 2)
+                        , Math.Round(position.Quantity, 2)
+                        , Math.Round(position.CostBasis, 2)
+                        , Math.Round(_totalValue, 2));
+                }
             }
         }
 
         public void Liquidate(DateTime liquidationDate)
         {
-            //Debug.WriteLine("{0} \tSell \t{1} \t{2} \t{3}"
-            //    , liquidationDate.ToShortDateString()
-            //    , "all"
-            //    , Portfolio.TotalValue
-            //    , _totalValue);
+            var positions = Portfolio.PositionDictionary.Values.ToList();
 
-            _cashBalance += Portfolio.TotalValue;
-            _capitalGains += Portfolio.TotalValue - Portfolio.CostBasis;
-            Portfolio.Liquidate(liquidationDate);
+            foreach (var position in positions)
+            {
+                var saleValue = Portfolio.GetPositionSaleValue(position);
+                _cashBalance += saleValue;
+                _capitalGains += saleValue - position.CostBasis;
+                Portfolio.PositionDictionary.Remove(position.Symbol);
+
+                LogMessage("{0} \tSell \t{1} \t{2} \t{3} \t{4} \t{5} \t{6}"
+                    , liquidationDate.ToShortDateString()
+                    , position.Symbol
+                    , Math.Round(position.CurrentPrice, 2)
+                    , Math.Round(position.Quantity, 2)
+                    , Math.Round(position.CurrentValue, 2)
+                    , Math.Round(_totalValue, 2)
+                    , Math.Round(_capitalGains, 2));
+            }
         }
 
         public void PerformDailyActivities(DateTime date, IEnumerable<Quote> quotes)
@@ -97,7 +110,7 @@ namespace TradeSimulator.Model
 
         public void PrintCurrentPosition()
         {
-            Debug.WriteLine("Value: {0}", _totalValue);
+            LogMessage("Value: {0}", _totalValue);
         }
 
         private void PayTaxes(DateTime date)
@@ -112,6 +125,8 @@ namespace TradeSimulator.Model
                     _cashBalance -= _taxBalance;
                 }
 
+                LogMessage("Taxes: {0} \tAccountValue: {1}", Math.Round(_taxBalance, 2), Math.Round(_totalValue, 2));
+
                 _taxPayments.Add(previousYear, _taxBalance);
                 _capitalGains = 0;
             }
@@ -125,139 +140,13 @@ namespace TradeSimulator.Model
 
             return annualGrowth * 100;
         }
+
+        private void LogMessage(string message, params object[] args)
+        {
+            if (LoggingLevel == "All")
+            {
+                Debug.WriteLine(message, args);
+            }
+        }
     }
-
-    //public class Account2
-    //{
-    //    private string _name;
-    //    private decimal _openingBalance;
-    //    private decimal _capitalGains = 0;
-    //    private DateTime _firstTransactionDate = DateTime.MaxValue;
-    //    private DateTime _lastTransactionDate = DateTime.MinValue;
-    //    private DateTime _currentTransactionDate = DateTime.MinValue;
-
-    //    private decimal taxBalance
-    //    {
-    //        get { return _capitalGains * Constants.TAX_RATE; }
-    //    }
-
-    //    public Account2(string name, decimal openingBalance)
-    //    {
-    //        _name = name;
-    //        _openingBalance = openingBalance;
-    //        CashBalance = openingBalance;
-    //    }
-
-    //    public DateTime TransactionDate
-    //    {
-    //        get
-    //        {
-    //            return _currentTransactionDate;
-    //        }
-    //        private set
-    //        {
-    //            _currentTransactionDate = value;
-
-    //            if (_currentTransactionDate < _firstTransactionDate)
-    //            {
-    //                _firstTransactionDate = _currentTransactionDate;
-    //            }
-
-    //            if (_currentTransactionDate > _lastTransactionDate)
-    //            {
-    //                _lastTransactionDate = _currentTransactionDate;
-    //            }
-    //        }
-    //    }
-
-    //    public decimal CashBalance { get; private set; }
-    //    public decimal PurchasePrice { get; private set; }
-    //    public string CurrentSymbol { get; private set; }
-    //    public decimal CurrentStockQuantity { get; private set; }
-
-    //    public decimal TotalBalance
-    //    {
-    //        get { return CashBalance + (PurchasePrice * CurrentStockQuantity) - taxBalance; }
-    //    }
-
-    //    public void Buy(Quote quote)
-    //    {
-    //        if (CurrentStockQuantity != 0)
-    //        {
-    //            throw new Exception("Account already owns stock");
-    //        }
-
-    //        // If it is a new year, pay the taxes.
-    //        if (TransactionDate.Year != quote.DateValue.Year)
-    //        {
-    //            if (_capitalGains > 0)
-    //            {
-    //                CashBalance -= taxBalance;
-    //            }
-
-    //            _capitalGains = 0;
-    //        }
-
-    //        var spreadMultiplier = 1 + Constants.AVG_SPREAD;
-    //        PurchasePrice = quote.AdjustedClosePrice * spreadMultiplier;
-
-    //        if ((CashBalance - Constants.TRADING_FEE) / PurchasePrice > 0)
-    //        {
-    //            CurrentSymbol = quote.Symbol;
-    //            CurrentStockQuantity = (int)Math.Floor((CashBalance - Constants.TRADING_FEE) / PurchasePrice);
-    //            CashBalance = CashBalance - (PurchasePrice * CurrentStockQuantity) - Constants.TRADING_FEE;
-    //            TransactionDate = quote.DateValue;
-    //        }
-    //    }
-
-    //    public void Sell(Quote quote)
-    //    {
-    //        if (CurrentStockQuantity == 0)
-    //        {
-    //            throw new Exception("No stock to sell");
-    //        }
-
-    //        var salePrice = quote != null
-    //           ? quote.AdjustedClosePrice
-    //           : PurchasePrice;
-
-    //        // Reduce the sale price by the spread
-    //        var spreadMultiplier = 1 - Constants.AVG_SPREAD;
-    //        salePrice = salePrice * spreadMultiplier;
-    //        var purchaseValue = CurrentStockQuantity * PurchasePrice;
-    //        var saleValue = CurrentStockQuantity * salePrice;
-
-    //        _capitalGains += saleValue - purchaseValue - (Constants.TRADING_FEE * 2);
-    //        CashBalance += saleValue - Constants.TRADING_FEE;
-
-    //        PurchasePrice = 0;
-    //        CurrentStockQuantity = 0;
-    //        CurrentSymbol = string.Empty;
-    //        TransactionDate = quote.DateValue;
-    //    }
-
-    //    private double GetAnnualGrowth(decimal openingBalance, decimal closingBalance, double years)
-    //    {
-    //        var annualGrowth = Math.Pow((double)closingBalance / (double)openingBalance, 1 / years) - 1;
-    //        var annualGrowthPercent = annualGrowth * 100;
-
-    //        return Math.Round(annualGrowthPercent, 2);
-    //    }
-
-    //    public void ShowStatement()
-    //    {
-    //        var days = (_lastTransactionDate - _firstTransactionDate).TotalDays;
-    //        var years = days / 365.25;
-    //        var annualGrowth = GetAnnualGrowth(_openingBalance, TotalBalance, years);
-
-    //        Console.WriteLine("---------------------------------------------------");
-    //        Console.WriteLine(_name);
-    //        Console.WriteLine("--------");
-    //        Console.WriteLine("Opening Balance: {0}", Math.Round(_openingBalance, 2));
-    //        Console.WriteLine("Closing Balance: {0}", Math.Round(TotalBalance, 2));
-    //        Console.WriteLine("Annual Growth: {0}%", annualGrowth);
-    //        Console.WriteLine("---------------------------------------------------");
-    //        Console.WriteLine();
-    //    }
-    //}
 }

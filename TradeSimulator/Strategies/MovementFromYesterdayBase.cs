@@ -43,7 +43,7 @@ namespace TradeSimulator.Strategies
                 }
             }
 
-            if (!Account.Portfolio.Positions.ContainsKey(selectedQuote.Symbol))
+            if (!Account.Portfolio.PositionDictionary.ContainsKey(selectedQuote.Symbol))
             {
                 var purchaseRequest = new PurchaseRequest { Quote = selectedQuote, Percent = 1 };
                 Account.Liquidate(date);
