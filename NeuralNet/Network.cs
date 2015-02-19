@@ -24,30 +24,12 @@ namespace NeuralNet
             this.InputValues = inputValues;
             this.OutputValues = outputValues;
 
-            //this.initializeInputValuesArray();
-            //this.initializeOutputValuesArray();
-
             this.initializeHiddenDeltaArray();
             this.initializeOutputDeltaArray();
 
             this.initializeHiddenOutputArray();
             this.initializeOutputOutputArray();
         }
-
-        //private void initializeInputValuesArray()
-        //{
-        //    this.InputValues = new double[this._recordCount][];
-
-        //    for (int i = 0; i < this._recordCount; i++)
-        //    {
-        //        this.InputValues[i] = new double[NetworkSettings.InputNeurons];
-        //    }
-        //}
-
-        //private void initializeOutputValuesArray()
-        //{
-        //    this.OutputValues = new double[this._recordCount];
-        //}
 
         private void initializeHiddenDeltaArray()
         {
@@ -78,6 +60,21 @@ namespace NeuralNet
         {
             this.OutputOutput = new double[this._recordCount];
         }
+
+        //private void initializeInputValuesArray()
+        //{
+        //    this.InputValues = new double[this._recordCount][];
+
+        //    for (int i = 0; i < this._recordCount; i++)
+        //    {
+        //        this.InputValues[i] = new double[NetworkSettings.InputNeurons];
+        //    }
+        //}
+
+        //private void initializeOutputValuesArray()
+        //{
+        //    this.OutputValues = new double[this._recordCount];
+        //}
 
         //private void populateData(bool testNetwork)
         //{

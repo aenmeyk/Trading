@@ -13,10 +13,7 @@ namespace NeuralNet
         {
             initializeHiddenWeightArray();
             initializeOutputWeightArray();
-
             initializeHiddenBiasArray();
-            initializeOutputBiasArray();
-
             PopulateWeights();
         }
 
@@ -44,10 +41,6 @@ namespace NeuralNet
         private static void initializeHiddenBiasArray()
         {
             HiddenBias = new double[NetworkSettings.HiddenNeurons];
-        }
-
-        private static void initializeOutputBiasArray()
-        {
         }
 
         private static void PopulateHiddenWeights()

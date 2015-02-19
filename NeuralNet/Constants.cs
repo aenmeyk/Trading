@@ -6,7 +6,6 @@ namespace NeuralNet
     {
         public static int InputNeurons = -1;
         public static int HiddenNeurons = -1;
-        public static int PredictionDaysAhead = 1;
     }
 
     public static class ProcessingSettings

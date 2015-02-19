@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Common.Models;
 using DataAccess.Repositories;
@@ -7,9 +7,46 @@ using NeuralNet;
 
 namespace TradeSimulator.Strategies
 {
-    public class NeuralNetwork
+    public class NeuralNetwork : StrategyBase
     {
         private NeuralNetworkRepository _repository;
+
+        public override IEnumerable<string> Symbols
+        {
+            get
+            {
+                return new[]
+                {
+                    "SCHX",
+                    "SCHM",
+                    "SCHA",
+                    "SCHF",
+                    "SCHE",
+                    "SCHH",
+                    "VNQI",
+                };
+            }
+        }
+
+        protected override string Name
+        {
+            get { return "Neural Network"; }
+        }
+
+        protected override decimal Spread
+        {
+            get { return 0M; }
+        }
+
+        protected override decimal TradingFee
+        {
+            get { return 0M; }
+        }
+
+        protected override decimal TaxRate
+        {
+            get { return 0M; }
+        }
 
         public NeuralNetwork()
         {
@@ -25,9 +62,56 @@ namespace TradeSimulator.Strategies
             var trainingOutputValues = ConvertToOutputValues(trainingData);
             var testingInputValues = ConvertToInputValues(testingData, printOutput: true);
 
+            //var trainingInputValues = new[]
+            //{
+            //    new[] { 1.0, 3.0, 3.0 },
+            //    new[] { 4.0, 9.0, 4.0 },
+            //    new[] { 5.0, 4.0, 7.0 },
+            //    new[] { 3.0, 1.0, 1.0 },
+            //    new[] { 1.0, 2.0, 2.0 },
+            //    new[] { 3.0, 8.0, 1.0 },
+            //    new[] { 5.0, 7.0, 4.0 },
+            //    new[] { 2.0, 3.0, 1.0 },
+            //    new[] { 5.0, 2.0, 8.0 },
+            //    new[] { 2.0, 9.0, 9.0 }
+            //};
+
+            //var trainingOutputValues = new[]
+            //{
+            //    0.0,
+            //    1,
+            //    1,
+            //    0,
+            //    0,
+            //    1,
+            //    1,
+            //    0,
+            //    1,
+            //    1
+            //};
+
+            //var testingInputValues = new[]
+            //{
+            //    new[] { 7.0, 4.0, 2.0 },
+            //    new[] { 3.0, 1.0, 1.0 },
+            //    new[] { 4.0, 2.0, 2.0 },
+            //    new[] { 5.0, 9.0, 5.0 },
+            //    new[] { 9.0, 9.0, 9.0 },
+            //    new[] { 3.0, 8.0, 1.0 },
+            //    new[] { 5.0, 7.0, 4.0 },
+            //    new[] { 2.0, 3.0, 1.0 },
+            //    new[] { 5.0, 2.0, 8.0 },
+            //    new[] { 2.0, 9.0, 9.0 }
+            //};
+
             NetworkManager.InitializeNetwork(trainingInputValues, trainingOutputValues, testingInputValues);
             NetworkManager.TrainNetwork();
             NetworkManager.TestNetwork();
+        }
+
+        protected override void ExecuteStrategyImplementation(DateTime date, IEnumerable<Quote> quotes)
+        {
+            throw new NotImplementedException();
         }
 
         private double[][] ConvertToInputValues(IEnumerable<NeuralNetworkItem> neuralNetworkItems, bool printOutput = false)
@@ -60,11 +144,6 @@ namespace TradeSimulator.Strategies
                 result[i][19] = item.VolumeRsd128;
                 result[i][20] = item.VolumeRsd256;
                 result[i][21] = item.VolumeRsd512;
-
-                if (printOutput)
-                {
-                    Debug.WriteLine(string.Format("{0}\t{1}\t{2}", item.Symbol, item.DateValue.ToShortDateString(), item.FuturePriceChange1));
-                }
 
                 i++;
             }
