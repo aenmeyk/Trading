@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -59,10 +59,10 @@ namespace NeuralNet
                 NetworkOperations.RunOutputLayer(_testingNetwork, record);
             }
 
-            //foreach (var outputValue in _testingNetwork.OutputOutput)
-            //{
-            //    Console.WriteLine(Math.Round(outputValue, 4));
-            //}
+            foreach (var outputValue in _testingNetwork.OutputOutput)
+            {
+                Console.WriteLine(Math.Round(outputValue, 15));
+            }
         }
 
         public void PersistNetworkValues()
@@ -107,6 +107,43 @@ namespace NeuralNet
             _outputWeightsRepository.InsertNeuronValues(outputWeights);
             _hiddenBiasesRepository.InsertNeuronValues(hiddenBiases);
             _outputBiasesRepository.InsertNeuronValues(outputBias);
+        }
+
+        public void LoadNetworkValues()
+        {
+            var hiddenWeights = _hiddenWeightsRepository.Get<NeuronValue>();
+            var outputWeights = _outputWeightsRepository.Get<NeuronValue>();
+            var hiddenBiases = _hiddenBiasesRepository.Get<NeuronValue>();
+            var outputBiases = _outputBiasesRepository.Get<NeuronValue>();
+
+            var hiddenNeuronCount = hiddenBiases.Count();
+            var inputNeuronCount = hiddenWeights.Count() / hiddenNeuronCount;
+
+            Core.HiddenWeight = new double[hiddenNeuronCount][];
+            Core.OutputWeight = new double[hiddenNeuronCount];
+            Core.HiddenBias = new double[hiddenNeuronCount];
+
+            for (int i = 0; i < hiddenNeuronCount; i++)
+            {
+                Core.HiddenWeight[i] = new double[inputNeuronCount];
+            }
+
+            foreach (var neuronValue in hiddenWeights)
+            {
+                Core.HiddenWeight[neuronValue.HiddenNeuronIndex][neuronValue.InputNeuronIndex] = neuronValue.Value;
+            }
+
+            foreach (var neuronValue in outputWeights)
+            {
+                Core.OutputWeight[neuronValue.HiddenNeuronIndex] = neuronValue.Value;
+            }
+
+            foreach (var neuronValue in hiddenBiases)
+            {
+                Core.HiddenBias[neuronValue.HiddenNeuronIndex] = neuronValue.Value;
+            }
+
+            Core.OutputBias = outputBiases.Single().Value;
         }
     }
 }
