@@ -8,14 +8,14 @@ namespace NeuralNet
         {
             double currentNetValue = 0;
 
-            for (int neuron = 0; neuron < NetworkSettings.HiddenNeurons; neuron++)
+            for (int neuron = 0; neuron < NetworkSettings.HiddenNeuronCount; neuron++)
             {
-                for (int k = 0; k < NetworkSettings.InputNeurons; k++)
+                for (int k = 0; k < NetworkSettings.InputNeuronCount; k++)
                 {
                     currentNetValue += network.InputValues[record][k] * Core.HiddenWeight[neuron][k];
                 }
 
-                currentNetValue += currentNetValue / (NetworkSettings.InputNeurons - 1.0);
+                currentNetValue += currentNetValue / (NetworkSettings.InputNeuronCount - 1.0);
                 network.HiddenOutput[record][neuron] = TransferFunction(currentNetValue + Core.HiddenBias[neuron]);
             }
         }
@@ -24,7 +24,7 @@ namespace NeuralNet
         {
             double currentNetValue = 0;
 
-            for (int k = 0; k < NetworkSettings.HiddenNeurons; k++)
+            for (int k = 0; k < NetworkSettings.HiddenNeuronCount; k++)
             {
                 currentNetValue += network.HiddenOutput[record][k] * Core.OutputWeight[k];
             }
@@ -41,7 +41,7 @@ namespace NeuralNet
             network.OutputDelta[record] = network.OutputOutput[record] * (1 - network.OutputOutput[record]) * currentErrorFactor;
 
             //RUN HIDDEN LAYER
-            for (int neuron = 0; neuron < NetworkSettings.HiddenNeurons; neuron++)
+            for (int neuron = 0; neuron < NetworkSettings.HiddenNeuronCount; neuron++)
             {
                 currentErrorFactor = network.OutputDelta[record] * Core.OutputWeight[neuron];
                 network.HiddenDelta[record][neuron] = network.HiddenOutput[record][neuron] * (1 - network.HiddenOutput[record][neuron]) * currentErrorFactor;
@@ -51,9 +51,9 @@ namespace NeuralNet
         public static void BackPropogate(Network network, int record)
         {
             //UPDATE BIAS AND WEIGHTS FOR HIDDEN NEURONS
-            for (int neuron = 0; neuron < NetworkSettings.HiddenNeurons; neuron++)
+            for (int neuron = 0; neuron < NetworkSettings.HiddenNeuronCount; neuron++)
             {
-                for (int k = 0; k < NetworkSettings.InputNeurons; k++)
+                for (int k = 0; k < NetworkSettings.InputNeuronCount; k++)
                 {
                     Core.HiddenWeight[neuron][k] += network.CurrentLearningRate * network.InputValues[record][k] * network.HiddenDelta[record][neuron];
                 }
@@ -62,7 +62,7 @@ namespace NeuralNet
             }
 
             //UPDATE BIAS AND WEIGHTS FOR OUTPUT NEURONS
-            for (int k = 0; k < NetworkSettings.HiddenNeurons; k++)
+            for (int k = 0; k < NetworkSettings.HiddenNeuronCount; k++)
             {
                 Core.OutputWeight[k] += network.CurrentLearningRate * network.HiddenOutput[record][k] * network.OutputDelta[record];
             }

@@ -61,6 +61,7 @@ namespace TradeSimulator.Strategies
             var trainingInputValues = ConvertToInputValues(trainingData);
             var trainingOutputValues = ConvertToOutputValues(trainingData);
             var testingInputValues = ConvertToInputValues(testingData, printOutput: true);
+            var networkManager = new NetworkManager(trainingInputValues, trainingOutputValues, testingInputValues);
 
             //var trainingInputValues = new[]
             //{
@@ -104,9 +105,9 @@ namespace TradeSimulator.Strategies
             //    new[] { 2.0, 9.0, 9.0 }
             //};
 
-            NetworkManager.InitializeNetwork(trainingInputValues, trainingOutputValues, testingInputValues);
-            NetworkManager.TrainNetwork();
-            NetworkManager.TestNetwork();
+            networkManager.TrainNetwork();
+            networkManager.PersistNetworkValues();
+            // networkManager.TestNetwork();
         }
 
         protected override void ExecuteStrategyImplementation(DateTime date, IEnumerable<Quote> quotes)

@@ -1,6 +1,6 @@
 ﻿namespace DataAccess.Repositories
 {
-    public class NeuralNetworkRepository : RepositoryBase
+    public class NeuralNetworkRepository : SymbolRepositoryBase
     {
         protected override string TableName
         {

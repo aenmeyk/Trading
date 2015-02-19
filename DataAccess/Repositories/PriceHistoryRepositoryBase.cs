@@ -11,7 +11,7 @@ using GenericParsing;
 
 namespace DataAccess.Repositories
 {
-    public abstract class PriceHistoryRepositoryBase : RepositoryBase
+    public abstract class PriceHistoryRepositoryBase : SymbolRepositoryBase
     {
         public void PersistHistoricalPrices(string symbol, string historicalPrices)
         {
@@ -53,11 +53,7 @@ namespace DataAccess.Repositories
                 var dataTable = parser.GetDataTable();
                 var formattedDataTable = FormatDataTable(dataTable, symbol);
 
-                using (var bulkCopy = new SqlBulkCopy(ConnectionString, SqlBulkCopyOptions.Default))
-                {
-                    bulkCopy.DestinationTableName = TableName;
-                    bulkCopy.WriteToServer(formattedDataTable);
-                }
+                BulkInsert(formattedDataTable);
             }
         }
 

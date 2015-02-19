@@ -1,20 +1,29 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
+using Common.Models;
+using DataAccess.Repositories;
 
 namespace NeuralNet
 {
-    public static class NetworkManager
+    public class NetworkManager
     {
-        private static double[][] _trainingInputValues;
-        private static double[] _trainingOutputValues;
-        private static double[][] _testingInputValues;
-        private static Network _trainingNetwork;
-        private static Network _testingNetwork;
+        private double[][] _trainingInputValues;
+        private double[] _trainingOutputValues;
+        private double[][] _testingInputValues;
+        private Network _trainingNetwork;
+        private Network _testingNetwork;
 
-        public static void InitializeNetwork(double[][] trainingInputValues, double[] trainingOutputValues, double[][] testingInputValues)
+        private HiddenWeightsRepository _hiddenWeightsRepository = new HiddenWeightsRepository();
+        private OutputWeightsRepository _outputWeightsRepository = new OutputWeightsRepository();
+        private HiddenBiasesRepository _hiddenBiasesRepository = new HiddenBiasesRepository();
+        private OutputBiasesRepository _outputBiasesRepository = new OutputBiasesRepository();
+
+        public NetworkManager(double[][] trainingInputValues, double[] trainingOutputValues, double[][] testingInputValues)
         {
-            NetworkSettings.InputNeurons = trainingInputValues[0].Count();
-            NetworkSettings.HiddenNeurons = NetworkSettings.InputNeurons;
+            NetworkSettings.InputNeuronCount = trainingInputValues[0].Count();
+            NetworkSettings.HiddenNeuronCount = NetworkSettings.InputNeuronCount;
 
             _trainingInputValues = trainingInputValues;
             _trainingOutputValues = trainingOutputValues;
@@ -23,7 +32,7 @@ namespace NeuralNet
             Core.PopulateWeights();
         }
 
-        public static void TrainNetwork()
+        public void TrainNetwork()
         {
             Parallel.For(0, ProcessingSettings.Trials, trial =>
             {
@@ -40,7 +49,7 @@ namespace NeuralNet
             });
         }
 
-        public static void TestNetwork()
+        public void TestNetwork()
         {
             _testingNetwork = new Network(_testingInputValues);
 
@@ -54,6 +63,45 @@ namespace NeuralNet
             //{
             //    Console.WriteLine(Math.Round(outputValue, 4));
             //}
+        }
+
+        public void PersistNetworkValues()
+        {
+            var hiddenWeights = new Collection<NeuronValue>();
+            var outputWeights = new Collection<NeuronValue>();
+            var hiddenBiases = new Collection<NeuronValue>();
+
+            for (int hiddenNeuron = 0; hiddenNeuron < NetworkSettings.HiddenNeuronCount; hiddenNeuron++)
+            {
+                for (int inputNeuron = 0; inputNeuron < NetworkSettings.InputNeuronCount; inputNeuron++)
+                {
+                    hiddenWeights.Add(new NeuronValue
+                    {
+                        HiddenNeuronIndex = hiddenNeuron,
+                        InputNeuronIndex = inputNeuron,
+                        Value = Core.HiddenWeight[hiddenNeuron][inputNeuron]
+                    });
+                }
+
+                outputWeights.Add(new NeuronValue
+                {
+                    HiddenNeuronIndex = hiddenNeuron,
+                    Value = Core.OutputWeight[hiddenNeuron]
+                });
+
+                hiddenBiases.Add(new NeuronValue
+                {
+                    HiddenNeuronIndex = hiddenNeuron,
+                    Value = Core.HiddenBias[hiddenNeuron]
+                });
+            }
+
+            var outputBias = new NeuronValue { Value = Core.OutputBias };
+
+            _hiddenWeightsRepository.InsertNeuronValues(hiddenWeights);
+            _outputWeightsRepository.InsertNeuronValues(outputWeights);
+            _hiddenBiasesRepository.InsertNeuronValues(hiddenBiases);
+            _outputBiasesRepository.InsertNeuronValues(outputBias);
         }
     }
 }

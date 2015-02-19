@@ -37,7 +37,7 @@ namespace NeuralNet
 
             for (int j = 0; j < this._recordCount; j++)
             {
-                this.HiddenDelta[j] = new double[NetworkSettings.HiddenNeurons];
+                this.HiddenDelta[j] = new double[NetworkSettings.HiddenNeuronCount];
             }
         }
 
@@ -52,7 +52,7 @@ namespace NeuralNet
 
             for (int j = 0; j < this._recordCount; j++)
             {
-                this.HiddenOutput[j] = new double[NetworkSettings.HiddenNeurons];
+                this.HiddenOutput[j] = new double[NetworkSettings.HiddenNeuronCount];
             }
         }
 

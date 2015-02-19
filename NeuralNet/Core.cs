@@ -25,31 +25,31 @@ namespace NeuralNet
 
         private static void initializeHiddenWeightArray()
         {
-            HiddenWeight = new double[NetworkSettings.HiddenNeurons][];
+            HiddenWeight = new double[NetworkSettings.HiddenNeuronCount][];
 
-            for (int i = 0; i < NetworkSettings.HiddenNeurons; i++)
+            for (int i = 0; i < NetworkSettings.HiddenNeuronCount; i++)
             {
-                HiddenWeight[i] = new double[NetworkSettings.InputNeurons];
+                HiddenWeight[i] = new double[NetworkSettings.InputNeuronCount];
             }
         }
 
         private static void initializeOutputWeightArray()
         {
-            OutputWeight = new double[NetworkSettings.HiddenNeurons];
+            OutputWeight = new double[NetworkSettings.HiddenNeuronCount];
         }
 
         private static void initializeHiddenBiasArray()
         {
-            HiddenBias = new double[NetworkSettings.HiddenNeurons];
+            HiddenBias = new double[NetworkSettings.HiddenNeuronCount];
         }
 
         private static void PopulateHiddenWeights()
         {
             Random random = new Random();
 
-            for (int neuron2 = 0; neuron2 < NetworkSettings.HiddenNeurons; neuron2++)
+            for (int neuron2 = 0; neuron2 < NetworkSettings.HiddenNeuronCount; neuron2++)
             {
-                for (int neuron1 = 0; neuron1 < NetworkSettings.InputNeurons; neuron1++)
+                for (int neuron1 = 0; neuron1 < NetworkSettings.InputNeuronCount; neuron1++)
                 {
                     HiddenWeight[neuron2][neuron1] = (random.NextDouble() * 2) - 1;
                 }
@@ -62,7 +62,7 @@ namespace NeuralNet
         {
             Random random = new Random();
 
-            for (int neuron = 0; neuron < NetworkSettings.HiddenNeurons; neuron++)
+            for (int neuron = 0; neuron < NetworkSettings.HiddenNeuronCount; neuron++)
             {
                 OutputWeight[neuron] = (random.NextDouble() * 2) - 1;
             }

@@ -4,8 +4,8 @@ namespace NeuralNet
 {
     public static class NetworkSettings
     {
-        public static int InputNeurons = -1;
-        public static int HiddenNeurons = -1;
+        public static int InputNeuronCount = -1;
+        public static int HiddenNeuronCount = -1;
     }
 
     public static class ProcessingSettings
