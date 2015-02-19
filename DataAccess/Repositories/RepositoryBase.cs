@@ -21,6 +21,21 @@ namespace DataAccess.Repositories
             }
         }
 
+        public void Truncate()
+        {
+            var queryText = string.Format("TRUNCATE TABLE {0}", TableName);
+
+            using (var sqlConnection = new SqlConnection(ConnectionString))
+            {
+                sqlConnection.Open();
+                
+                using(var sqlCommand = new SqlCommand(queryText, sqlConnection))
+                {
+                    sqlCommand.ExecuteNonQuery();
+                }
+            }
+        }
+
         protected void BulkInsert(DataTable dataTable)
         {
             using (var bulkCopy = new SqlBulkCopy(ConnectionString, SqlBulkCopyOptions.Default))

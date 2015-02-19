@@ -98,6 +98,11 @@ namespace NeuralNet
 
             var outputBias = new NeuronValue { Value = Core.OutputBias };
 
+            _hiddenWeightsRepository.Truncate();
+            _outputWeightsRepository.Truncate();
+            _hiddenBiasesRepository.Truncate();
+            _outputBiasesRepository.Truncate();
+
             _hiddenWeightsRepository.InsertNeuronValues(hiddenWeights);
             _outputWeightsRepository.InsertNeuronValues(outputWeights);
             _hiddenBiasesRepository.InsertNeuronValues(hiddenBiases);
