@@ -2,7 +2,7 @@
 
 namespace NeuralNet
 {
-    public static class Core
+    internal static class Core
     {
         public static double[][] HiddenWeight;
         public static double[] OutputWeight;

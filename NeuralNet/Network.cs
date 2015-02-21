@@ -6,7 +6,7 @@ namespace NeuralNet
     {
         private int _recordCount;
 
-        public double CurrentLearningRate { get; set; }
+        public double LearningRate { get; set; }
 
         public double[][] InputValues;
         public double[] OutputValues;

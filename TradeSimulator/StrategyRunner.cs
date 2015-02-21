@@ -13,10 +13,11 @@ namespace TradeSimulator
 
         private IEnumerable<StrategyBase> _strategies = new StrategyBase[]
         {
-            new SP500Benchmark(),
-            new ActualAllocationBenchmark(),
+            //new SP500Benchmark(),
+            //new ActualAllocationBenchmark(),
             new MovementFromYesterday(),
-            new MovementFromYesterdayAllSymbols(),
+            //new MovementFromYesterdayAllSymbols(),
+            new NeuralNetwork(),
        };
 
         public StrategyRunner()

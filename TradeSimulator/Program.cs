@@ -8,16 +8,17 @@ namespace TradeSimulator
     {
         static void Main(string[] args)
         {
-            //var strategyRunner = new StrategyRunner();
-            //strategyRunner.Run();
-
             var sw = new Stopwatch();
             sw.Start();
-            var neuralNetwork = new NeuralNetwork();
-            neuralNetwork.Run();
-            Console.WriteLine("Elapsed Seconds: {0}", sw.Elapsed.TotalSeconds);
+
+            var strategyRunner = new StrategyRunner();
+            strategyRunner.Run();
+
+            //var neuralNetwork = new NeuralNetwork();
+            //neuralNetwork.Run();
 
             Console.WriteLine();
+            Console.WriteLine("Elapsed Seconds: {0}", sw.Elapsed.TotalSeconds);
             Console.WriteLine("Done");
             Console.ReadLine();
         }

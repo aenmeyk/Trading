@@ -21,6 +21,7 @@ namespace TradeSimulator.Strategies
 
         protected override decimal Spread
         {
+            //get { return 0M; }
             get { return 0.000579016666M; }
         }
 
@@ -31,6 +32,7 @@ namespace TradeSimulator.Strategies
 
         protected override decimal TaxRate
         {
+            //get { return 0M; }
             get { return 0.28M; }
         }
 

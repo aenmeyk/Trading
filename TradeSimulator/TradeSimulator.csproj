@@ -49,9 +49,9 @@
     <Compile Include="Strategies\MovementFromYesterdayAllSymbols.cs" />
     <Compile Include="Strategies\MovementFromYesterdayBase.cs" />
     <Compile Include="Strategies\ActualAllocationBenchmark.cs" />
+    <Compile Include="Strategies\NeuralNetwork.cs" />
     <Compile Include="Strategies\SP500Benchmark.cs" />
     <Compile Include="Strategies\MovementFromYesterday.cs" />
-    <Compile Include="Strategies\NeuralNetwork.cs" />
     <Compile Include="Strategies\StrategyBase.cs" />
     <Compile Include="StrategyRunner.cs" />
   </ItemGroup>

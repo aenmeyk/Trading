@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Data;
 using Common.Models;
-using System.Data;
 
 namespace DataAccess.Repositories
 {
-    public class OutputBiasesRepository : RepositoryBase
+    public class OutputBiasesRepository : SymbolRepositoryBase
     {
         protected override string TableName
         {
@@ -17,11 +16,12 @@ namespace DataAccess.Repositories
             {
                 Columns =
                 {
+                    new DataColumn("Symbol", typeof(string)),
                     new DataColumn("Value", typeof(decimal))
                 }
             };
 
-            dataTable.Rows.Add(neuronValue.Value);
+            dataTable.Rows.Add(neuronValue.Symbol, neuronValue.Value);
 
             BulkInsert(dataTable);
         }

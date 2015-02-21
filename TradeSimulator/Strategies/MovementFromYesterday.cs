@@ -9,10 +9,14 @@ namespace TradeSimulator.Strategies
             get { return "Movement from yesterday - Select symbols"; }
         }
 
-        protected override decimal Spread
-        {
-            get { return 0.000764670833M; }
-        }
+        protected override decimal TradingFee { get { return 0M; } }
+        protected override decimal Spread { get { return 0M; } }
+        protected override decimal TaxRate { get { return 0M; } }
+
+        //protected override decimal TradingFee { get { return 8.95M; } }
+        //protected override decimal Spread { get { return 0.00007549500M; } }
+        //protected override decimal TaxRate { get { return 0.28M; } }
+
 
         public override IEnumerable<string> Symbols
         {
@@ -20,18 +24,19 @@ namespace TradeSimulator.Strategies
             {
                 return new[]
                 {
+                    "RSP",
                     "SCHX",
-                    "SCHM",
-                    "SCHA",
-                    "SCHF",
-                    "SCHE",
-                    "SCHH",
-                    "SCHG",
-                    "SCHV",
+                    "SPLV",
+                    "SCHB",
+                    "SCHD",
+                    "RPV",
+                    "RPG",
+                    "LOWC",
                     "PIN",
-                    "GXC",
-                    "GMF",
-                    "FEU"
+                    "PKW",
+                    "SCHG",
+                    "SCHH",
+                    "SCHV",
                 };
             }
         }

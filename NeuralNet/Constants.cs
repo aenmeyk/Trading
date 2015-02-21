@@ -2,28 +2,23 @@
 
 namespace NeuralNet
 {
-    public static class NetworkSettings
+    internal static class NetworkSettings
     {
         public static int InputNeuronCount = -1;
         public static int HiddenNeuronCount = -1;
     }
 
-    public static class ProcessingSettings
+    internal static class ProcessingSettings
     {
-        public static DateTime TestPeriodStartDate = new DateTime(2015, 1, 1);
-        public static DateTime TestPeriodEndDate = new DateTime(2020, 12, 31);
-        public static bool ForwardDates = true;
-        public static double StartLearningRate = 0.2;
-        public static double EndLearningRate = 0.0001;
-        public static int Trials = 1000;
-        public static int ThresholdDivisor = 0;
-        public static int FixedTopSecurities = 1;
-        public static double FixedThreshold = 0;
-
-        public static double LearningRateMultiplier;
+        //public static DateTime TestPeriodStartDate = new DateTime(2015, 1, 1);
+        //public static DateTime TestPeriodEndDate = new DateTime(2020, 12, 31);
+        public static double LearningRate = 0.15;
+        //public static double EndLearningRate = 0.0001;
+        public static int Trials = 80;
+        public static double LearningRateMultiplier = 1;
     }
 
-    public static class TestSettings
+    internal static class TestSettings
     {
         public static DateTime TrainStartDate { get; set; }
         public static DateTime TrainEndDate { get; set; }

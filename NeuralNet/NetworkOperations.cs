@@ -2,7 +2,7 @@
 
 namespace NeuralNet
 {
-    public class NetworkOperations
+    public static class NetworkOperations
     {
         public static void RunHiddenLayer(Network network, int record)
         {
@@ -55,19 +55,19 @@ namespace NeuralNet
             {
                 for (int k = 0; k < NetworkSettings.InputNeuronCount; k++)
                 {
-                    Core.HiddenWeight[neuron][k] += network.CurrentLearningRate * network.InputValues[record][k] * network.HiddenDelta[record][neuron];
+                    Core.HiddenWeight[neuron][k] += network.LearningRate * network.InputValues[record][k] * network.HiddenDelta[record][neuron];
                 }
 
-                Core.HiddenBias[neuron] += network.CurrentLearningRate * network.HiddenDelta[record][neuron];
+                Core.HiddenBias[neuron] += network.LearningRate * network.HiddenDelta[record][neuron];
             }
 
             //UPDATE BIAS AND WEIGHTS FOR OUTPUT NEURONS
             for (int k = 0; k < NetworkSettings.HiddenNeuronCount; k++)
             {
-                Core.OutputWeight[k] += network.CurrentLearningRate * network.HiddenOutput[record][k] * network.OutputDelta[record];
+                Core.OutputWeight[k] += network.LearningRate * network.HiddenOutput[record][k] * network.OutputDelta[record];
             }
 
-            Core.OutputBias += network.CurrentLearningRate * network.OutputDelta[record];
+            Core.OutputBias += network.LearningRate * network.OutputDelta[record];
         }
 
         public static double TransferFunction(double val)

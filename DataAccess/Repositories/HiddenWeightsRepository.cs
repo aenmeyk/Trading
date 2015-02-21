@@ -4,7 +4,7 @@ using System.Data;
 
 namespace DataAccess.Repositories
 {
-    public class HiddenWeightsRepository : RepositoryBase
+    public class HiddenWeightsRepository : SymbolRepositoryBase
     {
         protected override string TableName
         {
@@ -17,6 +17,7 @@ namespace DataAccess.Repositories
             {
                 Columns =
                 {
+                    new DataColumn("Symbol", typeof(string)),
                     new DataColumn("HiddenNeuronIndex", typeof(int)),
                     new DataColumn("InputNeuronIndex", typeof(int)),
                     new DataColumn("Value", typeof(decimal))
@@ -25,7 +26,7 @@ namespace DataAccess.Repositories
 
             foreach (var neuronValue in neuronValues)
             {
-                dataTable.Rows.Add(neuronValue.HiddenNeuronIndex, neuronValue.InputNeuronIndex, neuronValue.Value);
+                dataTable.Rows.Add(neuronValue.Symbol, neuronValue.HiddenNeuronIndex, neuronValue.InputNeuronIndex, neuronValue.Value);
             }
 
             BulkInsert(dataTable);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Common.Models;
 using TradeSimulator.Model;
@@ -20,37 +21,45 @@ namespace TradeSimulator.Strategies
             get { return 0.28M; }
         }
 
+        DateTime lastDate = DateTime.MinValue;
+
         protected override void ExecuteStrategyImplementation(DateTime date, IEnumerable<Quote> quotes)
         {
-            var lowestGrowth = decimal.MaxValue;
-            var selectedQuote = quotes.First();
-
-            if (_previousDayQuotes != null && _previousDayQuotes.Count() > 0)
+            if ((date - lastDate).TotalDays >= 0)
             {
-                foreach (var quote in quotes)
-                {
-                    if (_previousDayQuotes.ContainsKey(quote.Symbol))
-                    {
-                        var previousDayQuote = _previousDayQuotes[quote.Symbol];
-                        var growth = quote.AdjustedClosePrice / previousDayQuote.AdjustedClosePrice;
+                var lowestGrowth = decimal.MaxValue;
+                var selectedQuote = quotes.First();
 
-                        if (growth < lowestGrowth)
+                if (_previousDayQuotes != null && _previousDayQuotes.Count() > 0)
+                {
+                    foreach (var quote in quotes)
+                    {
+                        if (_previousDayQuotes.ContainsKey(quote.Symbol))
                         {
-                            selectedQuote = quote;
-                            lowestGrowth = growth;
+                            var previousDayQuote = _previousDayQuotes[quote.Symbol];
+                            var growth = quote.AdjustedClosePrice / previousDayQuote.AdjustedClosePrice;
+
+                            if (growth < lowestGrowth)
+                            {
+                                selectedQuote = quote;
+                                lowestGrowth = growth;
+                            }
                         }
                     }
                 }
+
+                if (!Account.Portfolio.PositionDictionary.ContainsKey(selectedQuote.Symbol))
+                {
+                    var purchaseRequest = new PurchaseRequest { Quote = selectedQuote, Percent = 1 };
+                    Account.Liquidate(date);
+                    Account.Buy(new[] { purchaseRequest });
+                }
+
+                _previousDayQuotes = quotes.ToDictionary(x => x.Symbol);
+                lastDate = date;
             }
 
-            if (!Account.Portfolio.PositionDictionary.ContainsKey(selectedQuote.Symbol))
-            {
-                var purchaseRequest = new PurchaseRequest { Quote = selectedQuote, Percent = 1 };
-                Account.Liquidate(date);
-                Account.Buy(new[] { purchaseRequest });
-            }
-
-            _previousDayQuotes = quotes.ToDictionary(x => x.Symbol);
+            Debug.WriteLine(Account.Portfolio.TotalValue);
         }
     }
 }

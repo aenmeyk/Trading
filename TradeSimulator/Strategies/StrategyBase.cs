@@ -18,7 +18,7 @@ namespace TradeSimulator.Strategies
         protected virtual string LoggingLevel { get { return "None"; } }
         public abstract IEnumerable<string> Symbols { get; }
 
-        public void Initialize(DateTime startDate)
+        public virtual void Initialize(DateTime startDate)
         {
             Account = new Account(Constants.OPENING_BALANCE, startDate, TaxRate, Spread, TradingFee);
             Account.LoggingLevel = LoggingLevel;
@@ -28,7 +28,11 @@ namespace TradeSimulator.Strategies
         {
             var applicableQuotes = quotes.Where(x => Symbols.Contains(x.Symbol));
             Account.PerformDailyActivities(date, applicableQuotes);
-            ExecuteStrategyImplementation(date, applicableQuotes);
+
+            if (applicableQuotes.Any())
+            {
+                ExecuteStrategyImplementation(date, applicableQuotes);
+            }
         }
 
         public void PrintResult(DateTime currentDate)
