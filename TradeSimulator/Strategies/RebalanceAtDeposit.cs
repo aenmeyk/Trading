@@ -7,11 +7,11 @@ using TradeSimulator.Model;
 
 namespace TradeSimulator.Strategies
 {
-    public class EvenAllocation : StrategyBase
+    public class RebalanceAtDeposit : StrategyBase
     {
         protected override string Name
         {
-            get { return "Even Allocation Benchmark"; }
+            get { return "Rebalance at deposit"; }
         }
 
         protected override bool PrintRunningBalance { get { return false; } }
@@ -49,7 +49,7 @@ namespace TradeSimulator.Strategies
         protected override decimal TradingFee { get { return 0M; } }
         protected override decimal TaxRate { get { return 0M; } }
 
-        protected override void ExecuteStrategyImplementation(DateTime date)
+        protected override void DepositCashImplementation(DateTime date, decimal amount)
         {
             var quotes = TodayQuotes.Values;
 

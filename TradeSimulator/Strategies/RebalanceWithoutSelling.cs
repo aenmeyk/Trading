@@ -7,11 +7,11 @@ using TradeSimulator.Model;
 
 namespace TradeSimulator.Strategies
 {
-    public class EvenAllocation : StrategyBase
+    public class RebalanceWithoutSelling : StrategyBase
     {
         protected override string Name
         {
-            get { return "Even Allocation Benchmark"; }
+            get { return "Rebalance Without Selling"; }
         }
 
         protected override bool PrintRunningBalance { get { return false; } }
@@ -49,22 +49,41 @@ namespace TradeSimulator.Strategies
         protected override decimal TradingFee { get { return 0M; } }
         protected override decimal TaxRate { get { return 0M; } }
 
-        protected override void ExecuteStrategyImplementation(DateTime date)
+        protected override void DepositCashImplementation(DateTime date, decimal amount)
         {
             var quotes = TodayQuotes.Values;
 
             if (quotes.Any())
             {
+                var desiredPercent = 1.0M / Symbols.Count();
+                var totalValue = Account.Portfolio.TotalValue + amount;
                 var purchaseRequests = new Collection<PurchaseRequest>();
-                var percent = 1.0M / Symbols.Count();
 
+                //foreach (var position in Account.Portfolio.PositionDictionary.Values)
                 foreach (var quote in quotes)
                 {
-                    var purchaseRequest = new PurchaseRequest { Quote = quote, Percent = percent };
-                    purchaseRequests.Add(purchaseRequest);
+                    var allocation = desiredPercent;
+
+                    if (Account.Portfolio.PositionDictionary.ContainsKey(quote.Symbol))
+                    {
+                        var position = Account.Portfolio.PositionDictionary[quote.Symbol];
+                        allocation = desiredPercent - (position.CurrentValue / totalValue);
+                    }
+
+                    if (allocation > 0)
+                    {
+                        var purchaseRequest = new PurchaseRequest { Quote = quote, Percent = allocation };
+                        purchaseRequests.Add(purchaseRequest);
+                    }
                 }
 
-                Account.Liquidate(date);
+                var totalAllocation = purchaseRequests.Sum(x => x.Percent);
+
+                foreach (var purchaseRequest in purchaseRequests)
+                {
+                    purchaseRequest.Percent = purchaseRequest.Percent / totalAllocation;
+                }
+
                 Account.Buy(purchaseRequests);
             }
         }

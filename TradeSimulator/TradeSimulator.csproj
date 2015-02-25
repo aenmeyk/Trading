@@ -46,6 +46,9 @@
     <Compile Include="Model\PurchaseRequest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Strategies\AlwaysAllocateDepositEvenly.cs" />
+    <Compile Include="Strategies\RebalanceWithoutSelling.cs" />
+    <Compile Include="Strategies\RebalanceAtDeposit.cs" />
     <Compile Include="Strategies\SellWinnerBuyLoser.cs" />
     <Compile Include="Strategies\MovementFromYesterdayAllSymbols.cs" />
     <Compile Include="Strategies\EvenAllocation.cs" />

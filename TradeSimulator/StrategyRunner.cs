@@ -18,6 +18,9 @@ namespace TradeSimulator
             //new MovementFromYesterday(),
             //new MovementFromYesterdayAllSymbols(),
             new EvenAllocation(),
+            new RebalanceAtDeposit(),
+            new RebalanceWithoutSelling(),
+            new AlwaysAllocateDepositEvenly(),
             new BuyLoser(),
             //new NeuralNetwork(),
        };

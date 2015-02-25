@@ -9,8 +9,7 @@ namespace TradeSimulator.Strategies
 {
     public class BuyLoser : StrategyBase
     {
-        private DateTime _lastDate = DateTime.MinValue;
-        private Dictionary<string, Quote> _previousQuotes = new Dictionary<string, Quote>();
+        private DateTime _previousPurchaseDate = DateTime.MinValue;
 
         protected override string Name
         {
@@ -41,23 +40,29 @@ namespace TradeSimulator.Strategies
             }
         }
 
-        protected override decimal Spread { get { return 0M; } }
+        //protected override decimal Spread { get { return 0M; } }
+        //protected override decimal TradingFee { get { return 0M; } }
+        //protected override decimal TaxRate { get { return 0M; } }
+
+        protected override decimal Spread { get { return 0.000704704M; } }
         protected override decimal TradingFee { get { return 0M; } }
         protected override decimal TaxRate { get { return 0M; } }
 
-        protected override void ExecuteStrategyImplementation(DateTime date)
+        protected override void DepositCashImplementation(DateTime date, decimal amount)
         {
-            if ((date - _lastDate).TotalDays >= 15)
-            {
-                var quotes = TodayQuotes.Values;
-                var lowestGrowth = decimal.MaxValue;
-                var selectedQuote = quotes.First();
+            var quotes = TodayQuotes.Values;
+            var lowestGrowth = decimal.MaxValue;
+            var selectedQuote = quotes.First();
 
-                foreach (var symbol in Symbols)
+            foreach (var symbol in Symbols)
+            {
+                if (AllQuotes.ContainsKey(_previousPurchaseDate))
                 {
-                    if (_previousQuotes.ContainsKey(symbol))
+                    var previousQuotes = AllQuotes[_previousPurchaseDate];
+                    var prevoiusQuote = previousQuotes.FirstOrDefault(x => x.Symbol == symbol);
+
+                    if (prevoiusQuote != null)
                     {
-                        var prevoiusQuote = _previousQuotes[symbol];
                         var currentQuote = quotes.Single(x => x.Symbol == symbol);
                         var growth = currentQuote.AdjustedClosePrice / prevoiusQuote.AdjustedClosePrice;
 
@@ -68,13 +73,12 @@ namespace TradeSimulator.Strategies
                         }
                     }
                 }
-
-                var purchaseRequest = new PurchaseRequest { Quote = selectedQuote, Percent = 1 };
-                Account.Buy(new[] { purchaseRequest });
-
-                _lastDate = date;
-                _previousQuotes = quotes.ToDictionary(x => x.Symbol);
             }
+
+            var purchaseRequest = new PurchaseRequest { Quote = selectedQuote, Percent = 1 };
+            Account.Buy(new[] { purchaseRequest });
+
+            _previousPurchaseDate = date;
         }
     }
 }
