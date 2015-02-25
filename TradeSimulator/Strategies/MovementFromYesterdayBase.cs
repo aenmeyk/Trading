@@ -9,6 +9,7 @@ namespace TradeSimulator.Strategies
 {
     public abstract class MovementFromYesterdayBase : StrategyBase
     {
+        private DateTime _lastDate = DateTime.MinValue;
         private Dictionary<string, Quote> _previousDayQuotes;
 
         protected override decimal TradingFee
@@ -21,12 +22,12 @@ namespace TradeSimulator.Strategies
             get { return 0.28M; }
         }
 
-        DateTime lastDate = DateTime.MinValue;
 
-        protected override void ExecuteStrategyImplementation(DateTime date, IEnumerable<Quote> quotes)
+        protected override void ExecuteStrategyImplementation(DateTime date)
         {
-            if ((date - lastDate).TotalDays >= 0)
+            if ((date - _lastDate).TotalDays >= 3)
             {
+                var quotes = TodayQuotes.Values;
                 var lowestGrowth = decimal.MaxValue;
                 var selectedQuote = quotes.First();
 
@@ -55,11 +56,10 @@ namespace TradeSimulator.Strategies
                     Account.Buy(new[] { purchaseRequest });
                 }
 
-                _previousDayQuotes = quotes.ToDictionary(x => x.Symbol);
-                lastDate = date;
+                _lastDate = date;
             }
 
-            Debug.WriteLine(Account.Portfolio.TotalValue);
+            _previousDayQuotes = TodayQuotes;
         }
     }
 }

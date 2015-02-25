@@ -40,6 +40,7 @@ namespace DataAccess.Repositories
         {
             using (var bulkCopy = new SqlBulkCopy(ConnectionString, SqlBulkCopyOptions.Default))
             {
+                bulkCopy.BulkCopyTimeout = 0;
                 bulkCopy.DestinationTableName = TableName;
                 bulkCopy.WriteToServer(dataTable);
             }

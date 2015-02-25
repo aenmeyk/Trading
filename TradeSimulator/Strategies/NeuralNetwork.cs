@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Models;
@@ -11,8 +12,11 @@ namespace TradeSimulator.Strategies
 {
     public class NeuralNetwork : StrategyBase
     {
+        private static readonly object locker = new object();
         private NeuralNetworkRepository _repository;
         private NetworkManager _networkManager = new NetworkManager();
+        private Dictionary<string, Core> _cores = new Dictionary<string, Core>();
+        private DateTime lastDate = DateTime.MinValue;
 
         public override IEnumerable<string> Symbols
         {
@@ -20,134 +24,33 @@ namespace TradeSimulator.Strategies
             {
                 return new[]
                 {
-                    "RSP",
-                    "SCHX",
-                    "SPLV",
-                    "SCHB",
-                    "SCHD",
-                    "RPV",
-                    "RPG",
-                    "LOWC",
-                    "PIN",
-                    "PKW",
-                    "SCHG",
-                    "SCHH",
-                    "SCHV",
+"EWG",
+"EWU",
+"EWQ",
+"EWC",
+                    "EWH",
+                    "EWA",
+                    "EWI",
+                    //"EWP",
+                    //"EWK",
+                    //"EWD",
+                    //"EWL",
+                    //"EWM",
+                    //"EWO",
+                    //"EWS",
+                    //"EWN",
                 };
             }
         }
-
-        //public override IEnumerable<string> Symbols
-        //{
-        //    get
-        //    {
-        //        return new[]
-        //        {
-        //            "ACIM",
-        //            "BIK",
-        //            "CSM",
-        //            "CVY",
-        //            "CWI",
-        //            "DEF",
-        //            "DGRE",
-        //            "DGRS",
-        //            "DGRW",
-        //            "DNL",
-        //            "DRW",
-        //            "DWAS",
-        //            "DWX",
-        //            "EDIV",
-        //            "EDOG",
-        //            "EEB",
-        //            "EELV",
-        //            "EMBB",
-        //            "EWEM",
-        //            "EWRS",
-        //            "EWX",
-        //            "FEU",
-        //            "FNDA",
-        //            "FNDB",
-        //            "FNDC",
-        //            "FNDE",
-        //            "FNDF",
-        //            "FNDX",
-        //            "GAL",
-        //            "GMF",
-        //            "GML",
-        //            "GXC",
-        //            "HGI",
-        //            "IBLN",
-        //            "IDLV",
-        //            "IDOG",
-        //            "IHDG",
-        //            "INKM",
-        //            "JPP",
-        //            "KNOW",
-        //            "MDD",
-        //            "MDYG",
-        //            "MDYV",
-        //            "NOBL",
-        //            "PAF",
-        //            "PDP",
-        //            "PID",
-        //            "PIE",
-        //            "PIN",
-        //            "PIZ",
-        //            "PKW",
-        //            "PXMC",
-        //            "PXSV",
-        //            "QAUS",
-        //            "QCAN",
-        //            "QDEU",
-        //            "QESP",
-        //            "QGBR",
-        //            "QJPN",
-        //            "QKOR",
-        //            "QMEX",
-        //            "QQQE",
-        //            "QTWN",
-        //            "RFG",
-        //            "RFV",
-        //            "RPG",
-        //            "RPV",
-        //            "RSCO",
-        //            "RSP",
-        //            "RWO",
-        //            "RZG",
-        //            "RZV",
-        //            "SCHA",
-        //            "SCHB",
-        //            "SCHC",
-        //            "SCHD",
-        //            "SCHE",
-        //            "SCHF",
-        //            "SCHG",
-        //            "SCHH",
-        //            "SCHM",
-        //            "SCHV",
-        //            "SCHX",
-        //            "SDOG",
-        //            "SLYG",
-        //            "SLYV",
-        //            "SPHB",
-        //            "SPLV",
-        //            "SYE",
-        //            "SYG",
-        //            "SYV",
-        //            "TOLZ",
-        //            "VSPY",
-        //            "WDIV",
-        //            "WMCR",
-        //            "XLG",
-        //            "YAO"
-        //        };
-        //    }
-        //}
 
         protected override string Name
         {
             get { return "Neural Network"; }
         }
+
+        protected override string LoggingLevel { get { return "All"; } }
+        protected override bool PrintRunningBalance { get { return false; } }
+
 
         protected override decimal Spread { get { return 0M; } }
         protected override decimal TaxRate { get { return 0M; } }
@@ -162,66 +65,71 @@ namespace TradeSimulator.Strategies
             _repository = new NeuralNetworkRepository();
         }
 
-        public override void Initialize(DateTime startDate)
+        public override void Initialize(DateTime startDate, Dictionary<DateTime, IEnumerable<Quote>> allQuotes)
         {
-            base.Initialize(startDate);
+            base.Initialize(startDate, allQuotes);
+            var neuralNetworkItems = _repository.GetForSymbols<NeuralNetworkItem>(Symbols);
+            var trainingData = neuralNetworkItems.Where(x => x.DateValue >= new DateTime(1996, 4, 1) && x.DateValue < startDate);
 
+            //Parallel.ForEach(Symbols, symbol =>
             foreach (var symbol in Symbols)
             {
-                var neuralNetworkItems = _repository.GetForSymbols<NeuralNetworkItem>(new[] { symbol });
-                var trainingData = neuralNetworkItems.Where(x => x.Symbol == symbol && x.DateValue < startDate);
+                var core = new Core();
+                TrainNetwork(symbol, core, trainingData);
+                _networkManager.LoadNetworkValues(symbol, core);
 
-                if (trainingData.Any())
+                lock (locker)
                 {
-                    _networkManager.TrainNetwork(trainingData);
-                    _networkManager.PersistNetworkValues(symbol);
+                    _cores.Add(symbol, core);
                 }
+             };
+            //});
+        }
+
+    private void TrainNetwork(string symbol, Core core, IEnumerable<NeuralNetworkItem> trainingData)
+        {
+            if (trainingData.Any())
+            {
+                core.InitializeArrays();
+                core.InitializeRandomValues();
+                _networkManager.TrainNetwork(symbol, core, trainingData);
+                _networkManager.PersistCoreValues(symbol, core);
             }
         }
 
-        private static readonly object locker = new object();
-
-        DateTime lastDate = DateTime.MinValue;
-
-        protected override void ExecuteStrategyImplementation(DateTime date, IEnumerable<Quote> quotes)
+        protected override void ExecuteStrategyImplementation(DateTime date)
         {
-            if ((date - lastDate).TotalDays >= 0)
+            if ((date - lastDate).TotalDays >= 10)
             {
+                var quotes = TodayQuotes.Values;
                 Quote selectedQuote = null;
                 var highestPrediction = double.MinValue;
+                var neuralNetworkItems = _repository.GetForSymbolsAndDate<NeuralNetworkItem>(quotes.Select(x => x.Symbol), date);
 
-                foreach (var quote in quotes)
-                //Parallel.ForEach(quotes, quote =>
+                if (neuralNetworkItems.Any())
                 {
-                    var loadSuccessful = _networkManager.LoadNetworkValues(quote.Symbol);
-
-                    if (loadSuccessful)
+                    //Parallel.ForEach(quotes, quote =>
+                    foreach(var quote in quotes)
                     {
-                        var neuralNetworkItems = _repository.GetForSymbolAndDate<NeuralNetworkItem>(quote.Symbol, date);
-                        var neuralNetworkItem = neuralNetworkItems.SingleOrDefault(x => x.DateValue == date);
+                        var core = _cores[quote.Symbol];
+                        var prediction = _networkManager.Predict(core, neuralNetworkItems);
 
-                        if (neuralNetworkItem != null)
+                        lock (locker)
                         {
-                            var prediction = _networkManager.Predict(neuralNetworkItem);
-
-                            lock (locker)
+                            if (prediction >= highestPrediction)
                             {
-                                if (prediction >= highestPrediction)
-                                {
-                                    highestPrediction = prediction;
-                                    selectedQuote = quote;
-                                }
+                                highestPrediction = prediction;
+                                selectedQuote = quote;
                             }
                         }
-                    }
-                //});
-                };
+                    };
 
-                if (selectedQuote != null && !Account.Portfolio.PositionDictionary.ContainsKey(selectedQuote.Symbol))
-                {
-                    var purchaseRequest = new PurchaseRequest { Quote = selectedQuote, Percent = 1 };
-                    Account.Liquidate(date);
-                    Account.Buy(new[] { purchaseRequest });
+                    if (selectedQuote != null && !Account.Portfolio.PositionDictionary.ContainsKey(selectedQuote.Symbol))
+                    {
+                        var purchaseRequest = new PurchaseRequest { Quote = selectedQuote, Percent = 1 };
+                        Account.Liquidate(date);
+                        Account.Buy(new[] { purchaseRequest });
+                    }
                 }
 
                 lastDate = date;

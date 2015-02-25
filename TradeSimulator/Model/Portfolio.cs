@@ -10,11 +10,13 @@ namespace TradeSimulator.Model
         private decimal _spread;
         private decimal _tradingFee;
         private DateTime _lastPortfolioUpdateDate = DateTime.MinValue;
+        private bool _allowPartialPurchases;
 
-        public Portfolio(decimal spread, decimal tradingFee)
+        public Portfolio(decimal spread, decimal tradingFee, bool allowPartialPurchases)
         {
             _spread = spread;
             _tradingFee = tradingFee;
+            _allowPartialPurchases = allowPartialPurchases;
             PositionDictionary = new Dictionary<string, Position>();
         }
 
@@ -48,13 +50,22 @@ namespace TradeSimulator.Model
             var tradingFee = GetTradingFee(purchaseRequest.Quote.Symbol);
             var spreadMultiplier = 1 + GetSpread(purchaseRequest.Quote.Symbol);
             var purchasePrice = purchaseRequest.Quote.AdjustedClosePrice * spreadMultiplier;
-            //var quantity = (int)Math.Floor((cashAvailableForPurchase - tradingFee) / purchasePrice);
-            var quantity = (cashAvailableForPurchase - tradingFee) / purchasePrice;
+            var quantity = _allowPartialPurchases
+                ? (cashAvailableForPurchase - tradingFee) / purchasePrice
+                : (int)Math.Floor((cashAvailableForPurchase - tradingFee) / purchasePrice);
 
             if (quantity > 0)
             {
-                var position = new Position(purchaseRequest.Quote.Symbol, quantity, purchasePrice, tradingFee, purchaseRequest.Quote.DateValue);
-                PositionDictionary.Add(position.Symbol, position);
+                var symbol = purchaseRequest.Quote.Symbol;
+
+                if (!PositionDictionary.ContainsKey(symbol))
+                {
+                    PositionDictionary.Add(symbol, new Position(symbol));
+                }
+
+                var position = PositionDictionary[symbol];
+                position.AddStock(quantity, purchasePrice, tradingFee);
+
                 return position;
             }
 

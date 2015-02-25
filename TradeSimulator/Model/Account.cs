@@ -22,21 +22,27 @@ namespace TradeSimulator.Model
             get { return _capitalGains * _taxRate; }
         }
 
-        private decimal _totalValue
-        {
-            get { return Portfolio.TotalValue + _cashBalance - _taxBalance; }
-        }
-
-        public Account(decimal openingBalance, DateTime accountOpenDate, decimal taxRate, decimal spread, decimal tradingFee)
+        public Account(
+            decimal openingBalance, 
+            DateTime accountOpenDate, 
+            decimal taxRate, 
+            decimal spread, 
+            decimal tradingFee,
+            bool allowPartialPurchases)
         {
             _openingBalance = openingBalance;
             _cashBalance = openingBalance;
             _accountOpenDate = accountOpenDate;
             _taxRate = taxRate;
-            Portfolio = new Portfolio(spread, tradingFee);
+            Portfolio = new Portfolio(spread, tradingFee, allowPartialPurchases);
         }
 
         public Portfolio Portfolio { get; private set; }
+
+        public decimal TotalValue
+        {
+            get { return Portfolio.TotalValue + _cashBalance - _taxBalance; }
+        }
 
         public string LoggingLevel { get; set; }
 
@@ -65,31 +71,42 @@ namespace TradeSimulator.Model
                         , Math.Round(purchaseRequest.Quote.AdjustedClosePrice, 2)
                         , Math.Round(position.Quantity, 2)
                         , Math.Round(position.CostBasis, 2)
-                        , Math.Round(_totalValue, 2));
+                        , Math.Round(TotalValue, 2));
                 }
             }
         }
 
-        public void Liquidate(DateTime liquidationDate)
+        public void Sell(DateTime date, Quote quote)
+        {
+            var position = Portfolio.PositionDictionary[quote.Symbol];
+            Sell(date, position);
+        }
+
+        public void Liquidate(DateTime date)
         {
             var positions = Portfolio.PositionDictionary.Values.ToList();
 
             foreach (var position in positions)
             {
-                var saleValue = Portfolio.GetPositionSaleValue(position);
-                _cashBalance += saleValue;
-                _capitalGains += saleValue - position.CostBasis;
-                Portfolio.PositionDictionary.Remove(position.Symbol);
-
-                LogMessage("{0} \tSell \t{1} \t{2} \t{3} \t{4} \t{5} \t{6}"
-                    , liquidationDate.ToShortDateString()
-                    , position.Symbol
-                    , Math.Round(position.CurrentPrice, 2)
-                    , Math.Round(position.Quantity, 2)
-                    , Math.Round(position.CurrentValue, 2)
-                    , Math.Round(_totalValue, 2)
-                    , Math.Round(_capitalGains, 2));
+                Sell(date, position);
             }
+        }
+
+        private void Sell(DateTime date, Position position)
+        {
+            var saleValue = Portfolio.GetPositionSaleValue(position);
+            _cashBalance += saleValue;
+            _capitalGains += saleValue - position.CostBasis;
+            Portfolio.PositionDictionary.Remove(position.Symbol);
+
+            LogMessage("{0} \tSell \t{1} \t{2} \t{3} \t{4} \t{5} \t{6}"
+                , date.ToShortDateString()
+                , position.Symbol
+                , Math.Round(position.CurrentPrice, 2)
+                , Math.Round(position.Quantity, 2)
+                , Math.Round(position.CurrentValue, 2)
+                , Math.Round(TotalValue, 2)
+                , Math.Round(_capitalGains, 2));
         }
 
         public void PerformDailyActivities(DateTime date, IEnumerable<Quote> quotes)
@@ -98,19 +115,24 @@ namespace TradeSimulator.Model
             PayTaxes(date);
         }
 
+        public void DepositCash(decimal amount)
+        {
+            _cashBalance += amount;
+        }
+
         public void PrintStatement(DateTime currentDate)
         {
             var annualGrowth = GetAnnualGrowth(currentDate);
 
-            Console.WriteLine("Opening Balance: {0}", Math.Round(_openingBalance, 2));
-            Console.WriteLine("Closing Balance: {0}", Math.Round(_totalValue, 2));
-            Console.WriteLine("Total Growth: {0}%", Math.Round(((_totalValue / _openingBalance) - 1) * 100, 2));
-            Console.WriteLine("Annual Growth: {0}%", Math.Round(annualGrowth, 2));
+            Console.WriteLine("Opening Balance: {0,12:n}", _openingBalance);
+            Console.WriteLine("Closing Balance: {0,12:n}", TotalValue);
+            Console.WriteLine("Total Growth:    {0,14:p}", (TotalValue / _openingBalance) - 1);
+            Console.WriteLine("Annual Growth:   {0,14:p}", annualGrowth);
         }
 
         public void PrintCurrentPosition()
         {
-            LogMessage("Value: {0}", _totalValue);
+            LogMessage("Value: {0}", TotalValue);
         }
 
         private void PayTaxes(DateTime date)
@@ -125,7 +147,7 @@ namespace TradeSimulator.Model
                     _cashBalance -= _taxBalance;
                 }
 
-                LogMessage("Taxes: {0} \tAccountValue: {1}", Math.Round(_taxBalance, 2), Math.Round(_totalValue, 2));
+                LogMessage("Taxes: {0} \tAccountValue: {1}", Math.Round(_taxBalance, 2), Math.Round(TotalValue, 2));
 
                 _taxPayments.Add(previousYear, _taxBalance);
                 _capitalGains = 0;
@@ -136,9 +158,9 @@ namespace TradeSimulator.Model
         {
             var days = (currentDate - _accountOpenDate).TotalDays;
             var years = days / 365.25;
-            var annualGrowth = Math.Pow((double)_totalValue / (double)_openingBalance, 1 / years) - 1;
+            var annualGrowth = Math.Pow((double)TotalValue / (double)_openingBalance, 1 / years) - 1;
 
-            return annualGrowth * 100;
+            return annualGrowth;
         }
 
         private void LogMessage(string message, params object[] args)

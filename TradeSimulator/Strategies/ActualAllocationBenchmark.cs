@@ -47,8 +47,10 @@ namespace TradeSimulator.Strategies
             { "VNQI", 0.025M }
         };
 
-        protected override void ExecuteStrategyImplementation(DateTime date, IEnumerable<Quote> quotes)
+        protected override void ExecuteStrategyImplementation(DateTime date)
         {
+            var quotes = TodayQuotes.Values;
+
             if (quotes.Any())
             {
                 var purchaseRequests = new Collection<PurchaseRequest>();

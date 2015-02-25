@@ -19,23 +19,16 @@ namespace TradeSimulator.Strategies
             get { return new[] { "^GSPC" }; }
         }
 
-        protected override decimal Spread
-        {
-            get { return 0M; }
-        }
+        protected override bool PrintRunningBalance { get { return false; } }
 
-        protected override decimal TradingFee
-        {
-            get { return 0M; }
-        }
+        protected override bool AllowPartialPurchases { get { return true; } }
+        protected override decimal Spread { get { return 0M; } }
+        protected override decimal TradingFee { get { return 0M; } }
+        protected override decimal TaxRate { get { return 0M; } }
 
-        protected override decimal TaxRate
+        protected override void ExecuteStrategyImplementation(DateTime date)
         {
-            get { return 0M; }
-        }
-
-        protected override void ExecuteStrategyImplementation(DateTime date, IEnumerable<Quote> quotes)
-        {
+            var quotes = TodayQuotes.Values;
             var selectedQuote = quotes.SingleOrDefault();
 
             if (selectedQuote != null && !Account.Portfolio.PositionDictionary.Any())

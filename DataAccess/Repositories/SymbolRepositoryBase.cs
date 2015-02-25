@@ -46,5 +46,17 @@ namespace DataAccess.Repositories
                 return sqlConnection.Query<T>(queryText);
             }
         }
+
+        public IEnumerable<T> GetForSymbolsAndDate<T>(IEnumerable<string> symbols, DateTime date)
+        {
+            var symbolText = string.Join(",", symbols.Select(x => string.Format("'{0}'", x)).ToArray());
+            var queryText = string.Format("SELECT * FROM {0} WHERE Symbol IN ({1}) AND DateValue = '{2}'", TableName, symbolText, date.ToSqlString());
+
+            using (var sqlConnection = new SqlConnection(ConnectionString))
+            {
+                sqlConnection.Open();
+                return sqlConnection.Query<T>(queryText);
+            }
+        }
     }
 }

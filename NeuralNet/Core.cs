@@ -2,54 +2,62 @@
 
 namespace NeuralNet
 {
-    internal static class Core
+    public class Core
     {
-        public static double[][] HiddenWeight;
-        public static double[] OutputWeight;
-        public static double[] HiddenBias;
-        public static double OutputBias;
+        private int _inputNeuronCount;
+        private int _hiddenNeuronCount;
 
-        static Core()
+        public double[][] HiddenWeight;
+        public double[] OutputWeight;
+        public double[] HiddenBias;
+        public double OutputBias;
+
+        public Core()
         {
-            initializeHiddenWeightArray();
-            initializeOutputWeightArray();
-            initializeHiddenBiasArray();
-            PopulateWeights();
+            _inputNeuronCount = NetworkSettings.InputNeuronCount;
+            _hiddenNeuronCount = NetworkSettings.HiddenNeuronCount;
         }
 
-        public static void PopulateWeights()
+        public void InitializeArrays()
+        {
+            InitializeHiddenWeightArray();
+            InitializeOutputWeightArray();
+            InitializeHiddenBiasArray();
+        }
+
+        public void InitializeRandomValues()
         {
             PopulateHiddenWeights();
             PopulateOutputWeights();
         }
 
-        private static void initializeHiddenWeightArray()
+        private void InitializeHiddenWeightArray()
         {
-            HiddenWeight = new double[NetworkSettings.HiddenNeuronCount][];
+            HiddenWeight = new double[_hiddenNeuronCount][];
 
-            for (int i = 0; i < NetworkSettings.HiddenNeuronCount; i++)
+            for (int i = 0; i < _hiddenNeuronCount; i++)
             {
-                HiddenWeight[i] = new double[NetworkSettings.InputNeuronCount];
+                HiddenWeight[i] = new double[_inputNeuronCount];
             }
         }
 
-        private static void initializeOutputWeightArray()
+        private void InitializeOutputWeightArray()
         {
-            OutputWeight = new double[NetworkSettings.HiddenNeuronCount];
+            OutputWeight = new double[_hiddenNeuronCount];
         }
 
-        private static void initializeHiddenBiasArray()
+        private void InitializeHiddenBiasArray()
         {
-            HiddenBias = new double[NetworkSettings.HiddenNeuronCount];
+            HiddenBias = new double[_hiddenNeuronCount];
         }
 
-        private static void PopulateHiddenWeights()
+        private void PopulateHiddenWeights()
         {
-            Random random = new Random();
+            var random = new Random();
 
-            for (int neuron2 = 0; neuron2 < NetworkSettings.HiddenNeuronCount; neuron2++)
+            for (int neuron2 = 0; neuron2 < _hiddenNeuronCount; neuron2++)
             {
-                for (int neuron1 = 0; neuron1 < NetworkSettings.InputNeuronCount; neuron1++)
+                for (int neuron1 = 0; neuron1 < _inputNeuronCount; neuron1++)
                 {
                     HiddenWeight[neuron2][neuron1] = (random.NextDouble() * 2) - 1;
                 }
@@ -58,11 +66,11 @@ namespace NeuralNet
             }
         }
 
-        private static void PopulateOutputWeights()
+        private void PopulateOutputWeights()
         {
-            Random random = new Random();
+            var random = new Random();
 
-            for (int neuron = 0; neuron < NetworkSettings.HiddenNeuronCount; neuron++)
+            for (int neuron = 0; neuron < _hiddenNeuronCount; neuron++)
             {
                 OutputWeight[neuron] = (random.NextDouble() * 2) - 1;
             }

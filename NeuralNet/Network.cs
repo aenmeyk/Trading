@@ -6,156 +6,61 @@ namespace NeuralNet
     {
         private int _recordCount;
 
+        public Core Core { get; private set; }
         public double LearningRate { get; set; }
 
-        public double[][] InputValues;
-        public double[] OutputValues;
+        public double[][] InputValues { get; private set; }
+        public double[] OutputValues { get; private set; }
 
-        public double[][] HiddenDelta;
-        public double[] OutputDelta;
+        public double[][] HiddenDelta { get; private set; }
+        public double[] OutputDelta { get; private set; }
 
-        public double[][] HiddenOutput;
-        public double[] OutputOutput;
+        public double[][] HiddenOutput { get; private set; }
+        public double[] OutputOutput { get; private set; }
 
-        public Network(double[][] inputValues, double[] outputValues = null)
+        public Network(Core core, double[][] inputValues, double[] outputValues = null)
         {
+            Core = core;
             _recordCount = inputValues.Count();
 
-            this.InputValues = inputValues;
-            this.OutputValues = outputValues;
+            InputValues = inputValues;
+            OutputValues = outputValues;
 
-            this.initializeHiddenDeltaArray();
-            this.initializeOutputDeltaArray();
+            InitializeHiddenDeltaArray();
+            InitializeOutputDeltaArray();
 
-            this.initializeHiddenOutputArray();
-            this.initializeOutputOutputArray();
+            InitializeHiddenOutputArray();
+            InitializeOutputOutputArray();
         }
 
-        private void initializeHiddenDeltaArray()
+        private void InitializeHiddenDeltaArray()
         {
-            this.HiddenDelta = new double[this._recordCount][];
+            HiddenDelta = new double[_recordCount][];
 
-            for (int j = 0; j < this._recordCount; j++)
+            for (int j = 0; j < _recordCount; j++)
             {
-                this.HiddenDelta[j] = new double[NetworkSettings.HiddenNeuronCount];
+                HiddenDelta[j] = new double[NetworkSettings.HiddenNeuronCount];
             }
         }
 
-        private void initializeOutputDeltaArray()
+        private void InitializeOutputDeltaArray()
         {
-            this.OutputDelta = new double[this._recordCount];
+            OutputDelta = new double[_recordCount];
         }
 
-        private void initializeHiddenOutputArray()
+        private void InitializeHiddenOutputArray()
         {
-            this.HiddenOutput = new double[this._recordCount][];
+            HiddenOutput = new double[_recordCount][];
 
-            for (int j = 0; j < this._recordCount; j++)
+            for (int j = 0; j < _recordCount; j++)
             {
-                this.HiddenOutput[j] = new double[NetworkSettings.HiddenNeuronCount];
+                HiddenOutput[j] = new double[NetworkSettings.HiddenNeuronCount];
             }
         }
 
-        private void initializeOutputOutputArray()
+        private void InitializeOutputOutputArray()
         {
-            this.OutputOutput = new double[this._recordCount];
+            OutputOutput = new double[_recordCount];
         }
-
-        //private void initializeInputValuesArray()
-        //{
-        //    this.InputValues = new double[this._recordCount][];
-
-        //    for (int i = 0; i < this._recordCount; i++)
-        //    {
-        //        this.InputValues[i] = new double[NetworkSettings.InputNeurons];
-        //    }
-        //}
-
-        //private void initializeOutputValuesArray()
-        //{
-        //    this.OutputValues = new double[this._recordCount];
-        //}
-
-        //private void populateData(bool testNetwork)
-        //{
-        //    if (!testNetwork)
-        //    {
-        //        this.InputValues[0] = new[] { 1.0, 3.0, 3.0 };
-        //        this.InputValues[1] = new[] { 4.0, 9.0, 4.0 };
-        //        this.InputValues[2] = new[] { 5.0, 4.0, 7.0 };
-        //        this.InputValues[3] = new[] { 3.0, 1.0, 1.0 };
-        //        this.InputValues[4] = new[] { 1.0, 2.0, 2.0 };
-        //        this.InputValues[5] = new[] { 3.0, 8.0, 1.0 };
-        //        this.InputValues[6] = new[] { 5.0, 7.0, 4.0 };
-        //        this.InputValues[7] = new[] { 2.0, 3.0, 1.0 };
-        //        this.InputValues[8] = new[] { 5.0, 2.0, 8.0 };
-        //        this.InputValues[9] = new[] { 2.0, 9.0, 9.0 };
-
-        //        this.OutputValues[0] = 0;
-        //        this.OutputValues[1] = 1;
-        //        this.OutputValues[2] = 1;
-        //        this.OutputValues[3] = 0;
-        //        this.OutputValues[4] = 0;
-        //        this.OutputValues[5] = 1;
-        //        this.OutputValues[6] = 1;
-        //        this.OutputValues[7] = 0;
-        //        this.OutputValues[8] = 1;
-        //        this.OutputValues[9] = 1;
-        //    }
-        //    else
-        //    {
-        //        this.InputValues[0] = new[] { 7.0, 4.0, 2.0 };
-        //        this.InputValues[1] = new[] { 3.0, 1.0, 1.0 };
-        //        this.InputValues[2] = new[] { 4.0, 2.0, 2.0 };
-        //        this.InputValues[3] = new[] { 5.0, 9.0, 5.0 };
-        //        this.InputValues[4] = new[] { 9.0, 9.0, 9.0 };
-        //        this.InputValues[5] = new[] { 3.0, 8.0, 1.0 };
-        //        this.InputValues[6] = new[] { 5.0, 7.0, 4.0 };
-        //        this.InputValues[7] = new[] { 2.0, 3.0, 1.0 };
-        //        this.InputValues[8] = new[] { 5.0, 2.0, 8.0 };
-        //        this.InputValues[9] = new[] { 2.0, 9.0, 9.0 };
-        //    }
-        //}
-
-        //private void populateData(bool testNetwork)
-        //{
-        //    if (!testNetwork)
-        //    {
-        //        this.InputValues[0] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[1] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[2] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[3] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[4] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[5] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[6] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[7] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[8] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[9] = new[] { 1.0, 1.0, 1.0 };
-
-        //        this.OutputValues[0] = 1;
-        //        this.OutputValues[1] = 0;
-        //        this.OutputValues[2] = 0;
-        //        this.OutputValues[3] = 0;
-        //        this.OutputValues[4] = 1;
-        //        this.OutputValues[5] = 1;
-        //        this.OutputValues[6] = 0;
-        //        this.OutputValues[7] = 1;
-        //        this.OutputValues[8] = 0;
-        //        this.OutputValues[9] = 1;
-        //    }
-        //    else
-        //    {
-        //        this.InputValues[0] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[1] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[2] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[3] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[4] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[5] = new[] { 1.0, 1.0, 1.0 };
-        //        this.InputValues[6] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[7] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[8] = new[] { 0.0, 0.0, 0.0 };
-        //        this.InputValues[9] = new[] { 1.0, 1.0, 1.0 };
-        //    }
-        //}
     }
 }

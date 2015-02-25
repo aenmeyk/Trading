@@ -12,11 +12,11 @@ namespace NeuralNet
             {
                 for (int k = 0; k < NetworkSettings.InputNeuronCount; k++)
                 {
-                    currentNetValue += network.InputValues[record][k] * Core.HiddenWeight[neuron][k];
+                    currentNetValue += network.InputValues[record][k] * network.Core.HiddenWeight[neuron][k];
                 }
 
                 currentNetValue += currentNetValue / (NetworkSettings.InputNeuronCount - 1.0);
-                network.HiddenOutput[record][neuron] = TransferFunction(currentNetValue + Core.HiddenBias[neuron]);
+                network.HiddenOutput[record][neuron] = TransferFunction(currentNetValue + network.Core.HiddenBias[neuron]);
             }
         }
 
@@ -26,10 +26,10 @@ namespace NeuralNet
 
             for (int k = 0; k < NetworkSettings.HiddenNeuronCount; k++)
             {
-                currentNetValue += network.HiddenOutput[record][k] * Core.OutputWeight[k];
+                currentNetValue += network.HiddenOutput[record][k] * network.Core.OutputWeight[k];
             }
 
-            network.OutputOutput[record] = TransferFunction(currentNetValue + Core.OutputBias);
+            network.OutputOutput[record] = TransferFunction(currentNetValue + network.Core.OutputBias);
         }
 
         public static void CalculateDelta(Network network, int record)
@@ -43,7 +43,7 @@ namespace NeuralNet
             //RUN HIDDEN LAYER
             for (int neuron = 0; neuron < NetworkSettings.HiddenNeuronCount; neuron++)
             {
-                currentErrorFactor = network.OutputDelta[record] * Core.OutputWeight[neuron];
+                currentErrorFactor = network.OutputDelta[record] * network.Core.OutputWeight[neuron];
                 network.HiddenDelta[record][neuron] = network.HiddenOutput[record][neuron] * (1 - network.HiddenOutput[record][neuron]) * currentErrorFactor;
             }
         }
@@ -55,19 +55,19 @@ namespace NeuralNet
             {
                 for (int k = 0; k < NetworkSettings.InputNeuronCount; k++)
                 {
-                    Core.HiddenWeight[neuron][k] += network.LearningRate * network.InputValues[record][k] * network.HiddenDelta[record][neuron];
+                    network.Core.HiddenWeight[neuron][k] += network.LearningRate * network.InputValues[record][k] * network.HiddenDelta[record][neuron];
                 }
 
-                Core.HiddenBias[neuron] += network.LearningRate * network.HiddenDelta[record][neuron];
+                network.Core.HiddenBias[neuron] += network.LearningRate * network.HiddenDelta[record][neuron];
             }
 
             //UPDATE BIAS AND WEIGHTS FOR OUTPUT NEURONS
             for (int k = 0; k < NetworkSettings.HiddenNeuronCount; k++)
             {
-                Core.OutputWeight[k] += network.LearningRate * network.HiddenOutput[record][k] * network.OutputDelta[record];
+                network.Core.OutputWeight[k] += network.LearningRate * network.HiddenOutput[record][k] * network.OutputDelta[record];
             }
 
-            Core.OutputBias += network.LearningRate * network.OutputDelta[record];
+            network.Core.OutputBias += network.LearningRate * network.OutputDelta[record];
         }
 
         public static double TransferFunction(double val)

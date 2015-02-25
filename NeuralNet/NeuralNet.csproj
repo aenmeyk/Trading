@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Core.cs" />
     <Compile Include="Network.cs" />
+    <Compile Include="NetworkManagerOld.cs" />
     <Compile Include="NetworkManager.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="NetworkOperations.cs" />

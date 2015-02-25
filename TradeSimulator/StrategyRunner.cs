@@ -13,11 +13,13 @@ namespace TradeSimulator
 
         private IEnumerable<StrategyBase> _strategies = new StrategyBase[]
         {
-            //new SP500Benchmark(),
+            new SP500Benchmark(),
             //new ActualAllocationBenchmark(),
-            new MovementFromYesterday(),
+            //new MovementFromYesterday(),
             //new MovementFromYesterdayAllSymbols(),
-            new NeuralNetwork(),
+            new EvenAllocation(),
+            new BuyLoser(),
+            //new NeuralNetwork(),
        };
 
         public StrategyRunner()
@@ -33,14 +35,29 @@ namespace TradeSimulator
 
             foreach (var strategy in _strategies)
             {
-                strategy.Initialize(startDate);
+                strategy.Initialize(startDate, quoteDictionary);
             }
 
-            foreach (var quotePair in quoteDictionary.OrderBy(x => x.Key))
+            foreach (var date in quoteDictionary.Keys.OrderBy(x => x))
             {
+                var endOfMonth = new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+
                 foreach (var strategy in _strategies)
                 {
-                    strategy.ExecuteStrategy(quotePair.Key, quotePair.Value);
+                    strategy.PerformDailyActivities(date);
+                }
+
+                if(date.Day == 15 || date == endOfMonth)
+                {
+                    foreach (var strategy in _strategies)
+                    {
+                        strategy.DepositCash(date, Constants.CONTRIBUTION);
+                    }
+                }
+
+                foreach (var strategy in _strategies)
+                {
+                    strategy.ExecuteStrategy(date);
                 }
             }
 
