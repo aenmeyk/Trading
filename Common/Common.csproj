@@ -45,6 +45,7 @@
     <Compile Include="Models\NeuralNetworkItem.cs" />
     <Compile Include="Models\NeuronValue.cs" />
     <Compile Include="Models\Quote.cs" />
+    <Compile Include="Models\Stock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

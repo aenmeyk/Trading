@@ -76,7 +76,7 @@ namespace TradeSimulator.Model
             }
         }
 
-        public void Sell(DateTime date, Quote quote)
+        public void Sell(DateTime date, PriceHistory quote)
         {
             var position = Portfolio.PositionDictionary[quote.Symbol];
             Sell(date, position);
@@ -109,7 +109,7 @@ namespace TradeSimulator.Model
                 , Math.Round(_capitalGains, 2));
         }
 
-        public void PerformDailyActivities(DateTime date, IEnumerable<Quote> quotes)
+        public void PerformDailyActivities(DateTime date, IEnumerable<PriceHistory> quotes)
         {
             Portfolio.UpdatePrices(quotes, date);
             PayTaxes(date);

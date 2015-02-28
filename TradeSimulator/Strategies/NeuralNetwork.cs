@@ -65,7 +65,7 @@ namespace TradeSimulator.Strategies
             _repository = new NeuralNetworkRepository();
         }
 
-        public override void Initialize(DateTime startDate, Dictionary<DateTime, IEnumerable<Quote>> allQuotes)
+        public override void Initialize(DateTime startDate, Dictionary<DateTime, IEnumerable<PriceHistory>> allQuotes)
         {
             base.Initialize(startDate, allQuotes);
             var neuralNetworkItems = _repository.GetForSymbols<NeuralNetworkItem>(Symbols);
@@ -102,7 +102,7 @@ namespace TradeSimulator.Strategies
             if ((date - lastDate).TotalDays >= 10)
             {
                 var quotes = TodayQuotes.Values;
-                Quote selectedQuote = null;
+                PriceHistory selectedQuote = null;
                 var highestPrediction = double.MinValue;
                 var neuralNetworkItems = _repository.GetForSymbolsAndDate<NeuralNetworkItem>(quotes.Select(x => x.Symbol), date);
 

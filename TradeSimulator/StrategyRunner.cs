@@ -70,11 +70,11 @@ namespace TradeSimulator
             }
         }
 
-        private Dictionary<DateTime, IEnumerable<Quote>> GetQuotes()
+        private Dictionary<DateTime, IEnumerable<PriceHistory>> GetQuotes()
         {
             var symbols = _strategies.SelectMany(x => x.Symbols);
             var currentMinDate = DateTime.MaxValue;
-            var quotes = _repository.GetForSymbolsAndDateRange<Quote>(symbols, Constants.START_DATE, Constants.END_DATE);
+            var quotes = _repository.GetForSymbolsAndDateRange<PriceHistory>(symbols, Constants.START_DATE, Constants.END_DATE);
             var groupByDate = quotes
                 .GroupBy(x => x.DateValue)
                 .ToDictionary(g => g.Key, g => g.Select(x => x));

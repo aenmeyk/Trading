@@ -10,7 +10,7 @@ namespace TradeSimulator.Strategies
     public abstract class MovementFromYesterdayBase : StrategyBase
     {
         private DateTime _lastDate = DateTime.MinValue;
-        private Dictionary<string, Quote> _previousDayQuotes;
+        private Dictionary<string, PriceHistory> _previousDayQuotes;
 
         protected override decimal TradingFee
         {

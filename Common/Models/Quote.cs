@@ -2,7 +2,7 @@
 
 namespace Common.Models
 {
-    public class Quote
+    public class PriceHistory
     {
         public string Symbol { get; set; }
         public DateTime DateValue { get; set; }

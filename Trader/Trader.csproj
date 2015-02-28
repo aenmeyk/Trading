@@ -41,9 +41,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\Account.cs" />
+    <Compile Include="Domain\Market.cs" />
+    <Compile Include="Domain\Portfolio.cs" />
+    <Compile Include="Domain\Position.cs" />
+    <Compile Include="Domain\PositionEntry.cs" />
+    <Compile Include="Domain\TaxLotSelectors\TaxLotOptimizer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Domain\Quote.cs" />
+    <Compile Include="Domain\Stock.cs" />
+    <Compile Include="Domain\TradeAction.cs" />
+    <Compile Include="Domain\Transaction.cs" />
+    <Compile Include="Strategies\SP500Benchmark.cs" />
+    <Compile Include="Strategies\StrategyBase.cs" />
+    <Compile Include="Strategies\StrategyRunner.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{3e5449d5-9126-427b-97fd-46d3d53c2967}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DataAccess\DataAccess.csproj">
+      <Project>{dc540905-5d29-45a5-a6c6-8e0924d64251}</Project>
+      <Name>DataAccess</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

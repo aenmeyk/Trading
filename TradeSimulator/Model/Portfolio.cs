@@ -72,7 +72,7 @@ namespace TradeSimulator.Model
             return null;
         }
 
-        public void UpdatePrices(IEnumerable<Quote> quotes, DateTime date)
+        public void UpdatePrices(IEnumerable<PriceHistory> quotes, DateTime date)
         {
             foreach (var quote in quotes)
             {

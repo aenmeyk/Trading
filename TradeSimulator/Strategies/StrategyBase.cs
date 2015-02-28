@@ -14,8 +14,8 @@ namespace TradeSimulator.Strategies
         protected abstract decimal Spread { get; }
         protected abstract decimal TradingFee { get; }
         protected Account Account { get; private set; }
-        protected Dictionary<DateTime, IEnumerable<Quote>> AllQuotes { get; private set; }
-        protected Dictionary<string, Quote> TodayQuotes { get; private set; }
+        protected Dictionary<DateTime, IEnumerable<PriceHistory>> AllQuotes { get; private set; }
+        protected Dictionary<string, PriceHistory> TodayQuotes { get; private set; }
 
         // None, All
         protected virtual string LoggingLevel { get { return "None"; } }
@@ -23,7 +23,7 @@ namespace TradeSimulator.Strategies
         protected virtual bool AllowPartialPurchases { get { return false; } }
         public abstract IEnumerable<string> Symbols { get; }
 
-        public virtual void Initialize(DateTime startDate, Dictionary<DateTime, IEnumerable<Quote>> allQuotes)
+        public virtual void Initialize(DateTime startDate, Dictionary<DateTime, IEnumerable<PriceHistory>> allQuotes)
         {
             AllQuotes = allQuotes;
             Account = new Account(Constants.OPENING_BALANCE, startDate, TaxRate, Spread, TradingFee, AllowPartialPurchases);

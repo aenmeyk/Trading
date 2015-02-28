@@ -10,7 +10,7 @@ namespace TradeSimulator.Strategies
     public class SellWinnerBuyLoser : StrategyBase
     {
         private DateTime _lastDate = DateTime.MinValue;
-        private Dictionary<string, Quote> _previousQuotes = new Dictionary<string, Quote>();
+        private Dictionary<string, PriceHistory> _previousQuotes = new Dictionary<string, PriceHistory>();
 
         protected override string Name
         {
