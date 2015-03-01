@@ -4,6 +4,8 @@ namespace Trader.Domain
 {
     public class PositionEntry
     {
+        private decimal _quantity = 0;
+
         public PositionEntry(string symbol, DateTime date, decimal quantity, decimal costBasis)
         {
             Symbol = symbol;
@@ -14,13 +16,32 @@ namespace Trader.Domain
 
         public string Symbol { get; private set; }
         public DateTime Date { get; private set; }
-        public decimal Quantity { get; set; }
         public decimal CostBasis { get; private set; }
 
         public decimal CostBasisPerShare
         {
-            get { return CostBasis / Quantity; }
+            get
+            {
+                if(Quantity == 0)
+                {
+                    return 0;
+                }
+
+                return CostBasis / Quantity;
+            }
         }
+
+        public decimal Quantity
+        {
+            get { return _quantity; }
+            set
+            {
+                var currentCostBasisPerShare = CostBasisPerShare;
+                _quantity = value;
+                CostBasis = _quantity * currentCostBasisPerShare;
+            }
+        }
+
 
         public decimal ShortTermGains
         {

@@ -15,14 +15,14 @@ namespace Trader.Domain.TaxLotSelectors
             var isLongTermSale = false;
 
             var orderedPositionEntries = positionEntries
-                .OrderBy(x => x.ShortTermGains)
-                .OrderBy(x => x.LongTermGains)
+                .OrderBy(x => x.ShortTermLosses)
                 .OrderBy(x => x.LongTermLosses)
-                .OrderBy(x => x.ShortTermLosses);
+                .OrderBy(x => x.LongTermGains)
+                .OrderBy(x => x.ShortTermGains);
 
             foreach (var positionEntry in orderedPositionEntries)
             {
-                var quantityToRemove = Math.Min(quantity, positionEntry.Quantity);
+                var quantityToRemove = Math.Min(quantityRemaining, positionEntry.Quantity);
                 shortTermTaxableAmount += positionEntry.ShortTermProfitPerShare * quantityToRemove;
                 longTermTaxableAmount += positionEntry.LongTermProfitPerShare * quantityToRemove;
                 positionEntry.Quantity -= quantityToRemove;
