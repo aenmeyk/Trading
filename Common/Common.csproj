@@ -44,7 +44,7 @@
     <Compile Include="ExtensionMethods\EnumerableExtensions.cs" />
     <Compile Include="Models\NeuralNetworkItem.cs" />
     <Compile Include="Models\NeuronValue.cs" />
-    <Compile Include="Models\Quote.cs" />
+    <Compile Include="Models\PriceHistory.cs" />
     <Compile Include="Models\Stock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

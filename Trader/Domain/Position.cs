@@ -24,7 +24,7 @@ namespace Trader.Domain
 
         public decimal CurrentValue
         {
-            get { return Market.QuoteDictionary[Symbol].AdjustedClosePrice * Quantity; }
+            get { return Market.QuoteDictionary[Symbol].SalePrice * Quantity; }
         }
 
         public decimal CostBasisPerShare

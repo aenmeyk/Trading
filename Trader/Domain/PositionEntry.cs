@@ -26,7 +26,7 @@ namespace Trader.Domain
         {
             get
             {
-                if (!_isShortTerm)
+                if (!IsShortTerm)
                 {
                     return 0;
                 }
@@ -44,7 +44,7 @@ namespace Trader.Domain
         {
             get
             {
-                if (_isShortTerm)
+                if (IsShortTerm)
                 {
                     return 0;
                 }
@@ -62,7 +62,7 @@ namespace Trader.Domain
         {
             get
             {
-                if (!_isShortTerm)
+                if (!IsShortTerm)
                 {
                     return 0;
                 }
@@ -80,7 +80,7 @@ namespace Trader.Domain
         {
             get
             {
-                if (_isShortTerm)
+                if (IsShortTerm)
                 {
                     return 0;
                 }
@@ -96,17 +96,33 @@ namespace Trader.Domain
 
         public decimal ShortTermProfitPerShare
         {
-            get { return _profit / Quantity; }
+            get
+            {
+                if (!IsShortTerm)
+                {
+                    return 0;
+                }
+
+                return _profit / Quantity;
+            }
         }
 
         public decimal LongTermProfitPerShare
         {
-            get { return _profit / Quantity; }
+            get
+            {
+                if (IsShortTerm)
+                {
+                    return 0;
+                }
+
+                return _profit / Quantity;
+            }
         }
 
-        private bool _isShortTerm
+        public bool IsShortTerm
         {
-            get { return Date.AddYears(1) < Market.Today; }
+            get { return Date.AddYears(1) > Market.Today; }
         }
 
         private decimal _profit
@@ -114,7 +130,7 @@ namespace Trader.Domain
             get
             {
                 var quote = Market.QuoteDictionary[Symbol];
-                var currentValue = quote.AdjustedClosePrice * Quantity;
+                var currentValue = quote.SalePrice * Quantity;
 
                 return currentValue - CostBasis;
             }

@@ -68,8 +68,7 @@ namespace Trader.Domain
         public void Buy(string symbol, decimal value)
         {
             var quote = Market.QuoteDictionary[symbol];
-            var price = quote.AdjustedClosePrice + quote.Stock.Spread;
-            var quantity = (value - quote.Stock.TradingFee) / price;
+            var quantity = (value - quote.Stock.TradingFee) / quote.PurchasePrice;
 
             if (quantity > 0)
             {
@@ -81,22 +80,23 @@ namespace Trader.Domain
         public void Sell(string symbol, decimal quantity)
         {
             var sellTransaction = _portfolio.Sell(symbol, quantity);
-            _shortTermTaxableAmount += sellTransaction.ShortTermTaxableAmount;
-            _longTermTaxableAmount += sellTransaction.LongTermTaxableAmount;
+            HandleSellTransaction(sellTransaction);
         }
 
         public void SellAll(string symbol)
         {
             var sellTransaction = _portfolio.SellAll(symbol);
-            _shortTermTaxableAmount += sellTransaction.ShortTermTaxableAmount;
-            _longTermTaxableAmount += sellTransaction.LongTermTaxableAmount;
+            HandleSellTransaction(sellTransaction);
         }
 
         public void Liquidate()
         {
             var sellTransactions = _portfolio.Liquidate();
-            _shortTermTaxableAmount += sellTransactions.Sum(x => x.ShortTermTaxableAmount);
-            _longTermTaxableAmount += sellTransactions.Sum(x => x.LongTermTaxableAmount);
+
+            foreach (var sellTransaction in sellTransactions)
+            {
+                HandleSellTransaction(sellTransaction);
+            }
         }
 
         public void PayTaxes()
@@ -114,6 +114,13 @@ namespace Trader.Domain
             Console.WriteLine("Closing Value: {0,12:n}", Value);
             //Console.WriteLine("Total Growth:    {0,14:p}", (TotalValue / _openingBalance) - 1);
             //Console.WriteLine("Annual Growth:   {0,14:p}", annualGrowth);
+        }
+
+        private void HandleSellTransaction(SellTransaction sellTransaction)
+        {
+            _shortTermTaxableAmount += sellTransaction.ShortTermTaxableAmount;
+            _longTermTaxableAmount += sellTransaction.LongTermTaxableAmount;
+            _cash += sellTransaction.TotalCashReturned;
         }
     }
 }

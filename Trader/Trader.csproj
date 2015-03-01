@@ -50,7 +50,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Domain\Quote.cs" />
-    <Compile Include="Domain\Stock.cs" />
     <Compile Include="Domain\TradeAction.cs" />
     <Compile Include="Domain\Transaction.cs" />
     <Compile Include="Strategies\SP500Benchmark.cs" />

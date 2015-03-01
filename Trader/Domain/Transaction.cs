@@ -25,7 +25,7 @@ namespace Trader.Domain
         public BuyTransaction(string symbol, decimal quantity)
             : base(symbol, quantity)
         {
-            Price = Quote.AdjustedClosePrice + Quote.Stock.Spread;
+            Price = Quote.PurchasePrice;
             Quantity = quantity;
         }
 
@@ -50,7 +50,7 @@ namespace Trader.Domain
         public SellTransaction(string symbol, decimal quantity, decimal shortTermTaxableAmount, decimal longTermTaxableAmount)
             : base(symbol, quantity)
         {
-            Price = Quote.AdjustedClosePrice - Quote.Stock.Spread;
+            Price = Quote.SalePrice;
             Quantity = quantity;
             ShortTermTaxableAmount = shortTermTaxableAmount;
             LongTermTaxableAmount = longTermTaxableAmount;
@@ -59,7 +59,7 @@ namespace Trader.Domain
         public decimal ShortTermTaxableAmount { get; private set; }
         public decimal LongTermTaxableAmount { get; private set; }
 
-        public decimal TotalAmountReturned
+        public decimal TotalCashReturned
         {
             get { return (Quantity * Price) - Fees; }
         }

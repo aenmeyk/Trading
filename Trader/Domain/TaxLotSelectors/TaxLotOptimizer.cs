@@ -11,6 +11,8 @@ namespace Trader.Domain.TaxLotSelectors
             var quantityRemaining = quantity;
             var shortTermTaxableAmount = 0M;
             var longTermTaxableAmount = 0M;
+            var isShortTermSale = false;
+            var isLongTermSale = false;
 
             var orderedPositionEntries = positionEntries
                 .OrderBy(x => x.ShortTermGains)
@@ -26,13 +28,34 @@ namespace Trader.Domain.TaxLotSelectors
                 positionEntry.Quantity -= quantityToRemove;
                 quantityRemaining -= quantityToRemove;
 
-                if(quantityRemaining == 0)
+                if (positionEntry.IsShortTerm)
+                {
+                    isShortTermSale = true;
+                }
+                else
+                {
+                    isLongTermSale = true;
+                }
+
+                if (quantityRemaining == 0)
                 {
                     break;
                 }
             }
 
-            if(quantityRemaining != 0)
+            var quote = Market.QuoteDictionary[symbol];
+            var fee = quote.Stock.TradingFee;
+
+            if (isShortTermSale)
+            {
+                shortTermTaxableAmount -= fee;
+            }
+            else if (isLongTermSale)
+            {
+                longTermTaxableAmount -= fee;
+            }
+
+            if (quantityRemaining != 0)
             {
                 throw new Exception("Error trying to sell position entries. Remaining quantity is not zero.");
             }
