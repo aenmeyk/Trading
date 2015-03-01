@@ -8,11 +8,16 @@ namespace Trader.Strategies
     public abstract class StrategyBase
     {
         protected abstract string Name { get; }
-        protected Account Account { get; private set; }
+        protected Account Account { get; set; }
 
         public virtual void Initialize()
         {
             Account = new Account(GeneralSettings.SHORT_TERM_TAX_RATE, GeneralSettings.LONG_TERM_TAX_RATE);
+        }
+
+        public virtual void Close()
+        {
+            Account.Liquidate();
         }
 
         public virtual IEnumerable<string> Symbols

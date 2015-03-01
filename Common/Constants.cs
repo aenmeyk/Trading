@@ -4,7 +4,7 @@ namespace Common
 {
     public static class GeneralSettings
     {
-        public const decimal OPENING_BALANCE = 653.73M;
+        public const decimal OPENING_BALANCE = 1000M;
         public const decimal CONTRIBUTION = 0M;
 
         public static DateTime START_DATE = new DateTime(1996, 4, 1);

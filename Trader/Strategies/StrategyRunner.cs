@@ -64,6 +64,7 @@ namespace Trader.Strategies
 
             foreach (var strategy in _strategies)
             {
+                strategy.Close();
                 strategy.PrintResult();
             }
         }

@@ -17,6 +17,12 @@ namespace Trader.Strategies
             get { return new[] { "^GSPC" }; }
         }
 
+        public override void Initialize()
+        {
+            Account = new Account(0, 0);
+            Account.AllowPartialholdings = true;
+        }
+
         protected override void ExecuteStrategyImplementation()
         {
             var symbol = Symbols.Single();
