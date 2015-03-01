@@ -35,7 +35,10 @@ namespace Trader.Strategies
             ExecuteStrategyImplementation();
         }
 
-        protected abstract void ExecuteStrategyImplementation();
+        protected virtual void ExecuteStrategyImplementation()
+        {
+            // Allow sub class to override.
+        }
 
         public virtual void PayTaxes()
         {

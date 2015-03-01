@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Trader.Domain
@@ -34,11 +35,6 @@ namespace Trader.Domain
             }
         }
 
-        private decimal _cashAvailableToTrade
-        {
-            get { return _cashValue - _taxesDue; }
-        }
-
         private decimal _taxesDue
         {
             get
@@ -51,6 +47,11 @@ namespace Trader.Domain
             }
         }
 
+        public decimal CashAvailableToTrade
+        {
+            get { return _cashValue - _taxesDue; }
+        }
+
         public bool AllowPartialholdings { get; set; }
 
         public decimal TaxesPaid { get; private set; }
@@ -60,6 +61,16 @@ namespace Trader.Domain
             get { return _portfolio.Value + _cash - _taxesDue; }
         }
 
+        public Dictionary<string, decimal> CurrentAllocations
+        {
+            get { return _portfolio.CurrentAllocations; }
+        }
+
+        public Dictionary<string, decimal> CurrentValues
+        {
+            get { return _portfolio.CurrentValues; }
+        }
+
         public void DepositCash(decimal amount)
         {
             _cash += amount;
@@ -67,7 +78,7 @@ namespace Trader.Domain
 
         public void Buy(string symbol)
         {
-            var value = _cashAvailableToTrade;
+            var value = CashAvailableToTrade;
             Buy(symbol, value);
         }
 

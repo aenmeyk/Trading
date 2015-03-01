@@ -19,6 +19,33 @@ namespace Trader.Domain
             get { return _positionDictionary.Values.Sum(x => x.CurrentValue - x.CostBasis); }
         }
 
+        public Dictionary<string, decimal> CurrentAllocations
+        {
+            get
+            {
+                var currentAllocations = new Dictionary<string, decimal>();
+                var currentTotalValue = Value;
+
+                foreach (var position in _positionDictionary.Values)
+                {
+                    var percent = position.CurrentValue / currentTotalValue;
+                    currentAllocations.Add(position.Symbol, percent);
+                }
+
+                return currentAllocations;
+            }
+        }
+
+        public Dictionary<string, decimal> CurrentValues
+        {
+            get
+            {
+                return _positionDictionary
+                    .Values
+                    .ToDictionary(x => x.Symbol, x => x.CurrentValue);
+            }
+        }
+
         public BuyTransaction Buy(string symbol, decimal quantity)
         {
             var transaction = new BuyTransaction(symbol, quantity);

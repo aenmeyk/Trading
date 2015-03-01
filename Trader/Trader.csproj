@@ -52,9 +52,11 @@
     <Compile Include="Domain\Quote.cs" />
     <Compile Include="Domain\TradeAction.cs" />
     <Compile Include="Domain\Transaction.cs" />
+    <Compile Include="Strategies\RebalanceByDepositBase.cs" />
     <Compile Include="Strategies\SP500Benchmark.cs" />
     <Compile Include="Strategies\StrategyBase.cs" />
     <Compile Include="Strategies\StrategyRunner.cs" />
+    <Compile Include="Strategies\SymbolLists.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

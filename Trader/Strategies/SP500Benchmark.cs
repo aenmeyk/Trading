@@ -14,7 +14,7 @@ namespace Trader.Strategies
 
         public override IEnumerable<string> Symbols
         {
-            get { return new[] { "^GSPC" }; }
+            get { return SymbolLists.SP500; }
         }
 
         public override void Initialize()
