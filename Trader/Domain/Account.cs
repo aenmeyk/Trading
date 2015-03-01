@@ -16,6 +16,7 @@ namespace Trader.Domain
         {
             _shortTermTaxRate = shortTermTaxRate;
             _longTermTaxRate = longTermTaxRate;
+            AllowPartialholdings = false;
         }
 
         private decimal _cash
@@ -23,6 +24,7 @@ namespace Trader.Domain
             get { return _cashValue; }
             set
             {
+                // Allow cash to dip below a tenth of a cent to allow for rounding errors.
                 if (value < -0.001M)
                 {
                     throw new Exception("Cash balance below zero.");
@@ -49,6 +51,10 @@ namespace Trader.Domain
             }
         }
 
+        public bool AllowPartialholdings { get; set; }
+
+        public decimal TaxesPaid { get; private set; }
+
         public decimal Value
         {
             get { return _portfolio.Value + _cash - _taxesDue; }
@@ -68,7 +74,7 @@ namespace Trader.Domain
         public void Buy(string symbol, decimal value)
         {
             var quote = Market.QuoteDictionary[symbol];
-            var quantity = (value - quote.Stock.TradingFee) / quote.PurchasePrice;
+            var quantity = CalculateQuantity(value, quote.PurchasePrice, quote.Stock.TradingFee);
 
             if (quantity > 0)
             {
@@ -77,7 +83,14 @@ namespace Trader.Domain
             }
         }
 
-        public void Sell(string symbol, decimal quantity)
+        public void Sell(string symbol, decimal value)
+        {
+            var quote = Market.QuoteDictionary[symbol];
+            var quantity = CalculateQuantity(value, quote.SalePrice, quote.Stock.TradingFee);
+            SellQuantity(symbol, quantity);
+        }
+
+        public void SellQuantity(string symbol, decimal quantity)
         {
             var sellTransaction = _portfolio.Sell(symbol, quantity);
             HandleSellTransaction(sellTransaction);
@@ -101,6 +114,7 @@ namespace Trader.Domain
 
         public void PayTaxes()
         {
+            TaxesPaid += _taxesDue;
             _cashValue -= _taxesDue;
             _shortTermTaxableAmount = 0;
             _longTermTaxableAmount = 0;
@@ -114,6 +128,18 @@ namespace Trader.Domain
             Console.WriteLine("Closing Value: {0,12:n}", Value);
             //Console.WriteLine("Total Growth:    {0,14:p}", (TotalValue / _openingBalance) - 1);
             //Console.WriteLine("Annual Growth:   {0,14:p}", annualGrowth);
+        }
+
+        private decimal CalculateQuantity(decimal value, decimal price, decimal fee)
+        {
+            var quantity = (value - fee) / price;
+
+            if (!AllowPartialholdings)
+            {
+                quantity = Math.Floor(quantity);
+            }
+
+            return quantity;
         }
 
         private void HandleSellTransaction(SellTransaction sellTransaction)

@@ -1,5 +1,4 @@
 ﻿using System;
-using Common;
 using Common.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,9 +6,6 @@ using Trader.Domain;
 
 namespace Tests
 {
-    // Tests:
-    //  - TaxLotOptimizer - Test different long vs. short term gains/losses.
-
     [TestClass]
     public class AccountTests
     {
@@ -48,6 +44,7 @@ namespace Tests
             SetPrice(_stockB, 200);
 
             _account = new Account(SHORT_TERM_TAX_RATE, LONG_TERM_TAX_RATE);
+            _account.AllowPartialholdings = true;
         }
 
         [TestMethod]
@@ -71,22 +68,55 @@ namespace Tests
         }
 
         [TestMethod]
-        public void Account_buy_and_liquidate_two_stocks()
+        public void Account_buy_and_liquidate_SchwabOneSource()
         {
+            // Initialize Account
+            _account.Value.Should().Be(0);
+
             // Make initial deposit
-            _account.DepositCash(1000M);
+            var depositAmount = 1000M;
+            _account.DepositCash(depositAmount);
+            _account.Value.Should().Be(depositAmount);
 
-            // Buy first stock
-            _account.Buy(_stockA.Symbol, 500);
-            _account.Value.Should().BeApproximately(989.0897206M, PRECISION);
-
-            // Buy second stock
-            _account.Buy(_stockB.Symbol, 500);
-            _account.Value.Should().BeApproximately(979.1586017M, PRECISION);
+            // Buy stock
+            _account.Buy(_stockA.Symbol);
+            _account.Value.Should().BeApproximately(987.0937126M, PRECISION);
 
             // Liquidate
             _account.Liquidate();
-            _account.Value.Should().BeApproximately(969.0068813M, PRECISION);
+            _account.Value.Should().BeApproximately(982.5149701M, PRECISION);
+        }
+
+        [TestMethod]
+        public void Account_buy_and_liquidate_whole_shares()
+        {
+            // Initialize Account
+            _account.AllowPartialholdings = false;
+
+            // Make initial deposit
+            var depositAmount = 950M;
+            _account.DepositCash(depositAmount);
+            _account.Buy(_stockA.Symbol);
+            _account.Value.Should().BeApproximately(937.4500000M, PRECISION);
+
+            // Liquidate
+            _account.Liquidate();
+            _account.Value.Should().BeApproximately(932.8000000M, PRECISION);
+        }
+
+        [TestMethod]
+        public void Account_buy_and_liquidate_two_stocks()
+        {
+            _stockA.SchwabOneSource = true;
+
+            // Buy stock
+            _account.DepositCash(1000M);
+            _account.Buy(_stockA.Symbol);
+            _account.Value.Should().BeApproximately(996.0079840M, PRECISION);
+
+            // Liquidate
+            _account.Liquidate();
+            _account.Value.Should().BeApproximately(996.8063872M, PRECISION);
         }
 
         [TestMethod]
@@ -104,6 +134,59 @@ namespace Tests
             // Sell second stock
             _account.SellAll(_stockB.Symbol);
             _account.Value.Should().BeApproximately(969.0068813M, PRECISION);
+        }
+
+        [TestMethod]
+        public void Account_buy_and_sell_value()
+        {
+            // Buy stocks
+            _account.DepositCash(1000M);
+            _account.Buy(_stockA.Symbol, 500);
+            _account.Buy(_stockB.Symbol, 500);
+
+            // Sell first stock
+            _account.Sell(_stockA.Symbol, 300);
+            _account.Value.Should().BeApproximately(973.2971106M, PRECISION);
+
+            // Sell second stock
+            _account.Sell(_stockB.Symbol, 200);
+            _account.Value.Should().BeApproximately(966.9114263M, PRECISION);
+        }
+
+        [TestMethod]
+        public void Account_buy_deposit_buy()
+        {
+            // Buy first batch
+            _account.DepositCash(1000M);
+            _account.Buy(_stockA.Symbol);
+
+            // Update stock price
+            SetPrice(_stockA, 150);
+
+            // Buy second batch
+            _account.DepositCash(1000M);
+            _account.Buy(_stockA.Symbol);
+            _account.Value.Should().BeApproximately(2467.7342814M, PRECISION);
+        }
+
+        [TestMethod]
+        public void Account_buy_liquidate_and_pay_taxes()
+        {
+            // Buy stock
+            var depositAmount = 1000M;
+            _account.DepositCash(depositAmount);
+            _account.Buy(_stockA.Symbol);
+
+            // Update stock price
+            SetPrice(_stockA, 150);
+
+            // Liquidate
+            _account.Liquidate();
+
+            // Pay taxes
+            _account.PayTaxes();
+            _account.Value.Should().BeApproximately(1377.3524551M, PRECISION);
+            _account.TaxesPaid.Should().BeApproximately(94.3381138M, PRECISION);
         }
 
         [TestMethod]
@@ -182,27 +265,27 @@ namespace Tests
             _account.Value.Should().BeApproximately(1931.4163523M, PRECISION);
 
             // Sell batch 1
-            _account.Sell(_stockA.Symbol, 5);
+            _account.SellQuantity(_stockA.Symbol, 5);
             _account.Value.Should().BeApproximately(1911.1410526M, PRECISION);
 
             // Sell batch 2
-            _account.Sell(_stockA.Symbol, 10);
+            _account.SellQuantity(_stockA.Symbol, 10);
             _account.Value.Should().BeApproximately(1878.6454533M, PRECISION);
 
             // Sell batch 3
-            _account.Sell(_stockA.Symbol, 10);
+            _account.SellQuantity(_stockA.Symbol, 10);
             _account.Value.Should().BeApproximately(1857.4379264M, PRECISION);
 
             // Sell batch 4
-            _account.Sell(_stockA.Symbol, 10);
+            _account.SellQuantity(_stockA.Symbol, 10);
             _account.Value.Should().BeApproximately(1831.2618590M, PRECISION);
 
             // Sell batch 5
-            _account.Sell(_stockA.Symbol, 10);
+            _account.SellQuantity(_stockA.Symbol, 10);
             _account.Value.Should().BeApproximately(1793.6638254M, PRECISION);
 
             // Sell batch 6
-            _account.Sell(_stockA.Symbol, 10);
+            _account.SellQuantity(_stockA.Symbol, 10);
             _account.Value.Should().BeApproximately(1748.1120274M, PRECISION);
 
             // Sell batch 7
