@@ -55,7 +55,7 @@ namespace Trader.Domain.TaxLotSelectors
                 longTermTaxableAmount -= fee;
             }
 
-            if (quantityRemaining != 0)
+            if (Math.Round(quantityRemaining, 25) != 0)
             {
                 throw new Exception("Error trying to sell position entries. Remaining quantity is not zero.");
             }

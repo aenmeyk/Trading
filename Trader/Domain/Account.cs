@@ -54,6 +54,7 @@ namespace Trader.Domain
 
         public bool AllowPartialholdings { get; set; }
 
+        public decimal FeesPaid { get; private set; }
         public decimal TaxesPaid { get; private set; }
 
         public decimal Value
@@ -91,6 +92,7 @@ namespace Trader.Domain
             {
                 var buyTransaction = _portfolio.Buy(symbol, quantity);
                 _cash -= buyTransaction.CostBasis;
+                FeesPaid += buyTransaction.Fees;
             }
         }
 
@@ -136,7 +138,9 @@ namespace Trader.Domain
             //var annualGrowth = GetAnnualGrowth(currentDate);
 
             //Console.WriteLine("Opening Balance: {0,12:n}", _openingBalance);
-            Console.WriteLine("Closing Value: {0,12:n}", Value);
+            Console.WriteLine("Closing Value:\t{0,12:n}", Value);
+            Console.WriteLine("Taxes:\t\t{0,12:n}", TaxesPaid + _taxesDue);
+            Console.WriteLine("Fees:\t\t{0,12:n}", FeesPaid);
             //Console.WriteLine("Total Growth:    {0,14:p}", (TotalValue / _openingBalance) - 1);
             //Console.WriteLine("Annual Growth:   {0,14:p}", annualGrowth);
         }
@@ -158,6 +162,7 @@ namespace Trader.Domain
             _shortTermTaxableAmount += sellTransaction.ShortTermTaxableAmount;
             _longTermTaxableAmount += sellTransaction.LongTermTaxableAmount;
             _cash += sellTransaction.TotalCashReturned;
+            FeesPaid += sellTransaction.Fees;
         }
     }
 }
