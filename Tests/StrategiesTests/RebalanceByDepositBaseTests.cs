@@ -66,7 +66,7 @@ namespace Tests.StrategiesTests
         }
 
         [TestMethod]
-        public void DepositCash_should_allocate_funds_to_stocks_below_desired_level()
+        public void DepositCash_should_allocate_funds_correctly2()
         {
             var firstAllocations = new Dictionary<string, decimal>
             {
@@ -99,6 +99,78 @@ namespace Tests.StrategiesTests
             fake.CurrentAllocations["D"].Should().BeApproximately(0.2750000M, PRECISION);
             fake.CurrentAllocations["E"].Should().BeApproximately(0.2416667M, PRECISION);
             fake.CurrentAllocations["F"].Should().BeApproximately(0.2416667M, PRECISION);
+        }
+
+        [TestMethod]
+        public void DepositCash_should_allocate_funds_correctly3()
+        {
+            var firstAllocations = new Dictionary<string, decimal>
+            {
+                { "C", 0.1M },
+                { "D", 0.55M },
+                { "E", 0.3M },
+                { "F", 0.05M },
+            };
+
+            var secondAllocations = new Dictionary<string, decimal>
+            {
+                { "C", 0.25M },
+                { "D", 0.25M },
+                { "E", 0.25M },
+                { "F", 0.25M },
+            };
+
+            var fake = new Fake();
+            fake.Initialize();
+            fake.SetAllocations(firstAllocations);
+            fake.DepositCash(10000);
+            fake.CurrentAllocations["C"].Should().Be(0.1M);
+            fake.CurrentAllocations["D"].Should().Be(0.55M);
+            fake.CurrentAllocations["E"].Should().Be(0.3M);
+            fake.CurrentAllocations["F"].Should().Be(0.05M);
+
+            fake.SetAllocations(secondAllocations);
+            fake.DepositCash(100);
+            fake.CurrentAllocations["C"].Should().BeApproximately(0.0990099M, PRECISION);
+            fake.CurrentAllocations["D"].Should().BeApproximately(0.5445545M, PRECISION);
+            fake.CurrentAllocations["E"].Should().BeApproximately(0.2970297M, PRECISION);
+            fake.CurrentAllocations["F"].Should().BeApproximately(0.0594059M, PRECISION);
+        }
+
+        [TestMethod]
+        public void DepositCash_should_allocate_funds_correctly4()
+        {
+            var firstAllocations = new Dictionary<string, decimal>
+            {
+                { "C", 0.1M },
+                { "D", 0.55M },
+                { "E", 0.3M },
+                { "F", 0.05M },
+            };
+
+            var secondAllocations = new Dictionary<string, decimal>
+            {
+                { "C", 0.25M },
+                { "D", 0.25M },
+                { "E", 0.25M },
+                { "F", 0.25M },
+            };
+
+            var fake = new Fake();
+            fake.Initialize();
+            fake.SetAllocations(firstAllocations);
+            fake.DepositCash(10000);
+            fake.CurrentAllocations["C"].Should().Be(0.1M);
+            fake.CurrentAllocations["D"].Should().Be(0.55M);
+            fake.CurrentAllocations["E"].Should().Be(0.3M);
+            fake.CurrentAllocations["F"].Should().Be(0.05M);
+
+            fake.SetAllocations(secondAllocations);
+            fake.DepositCash(3000);
+            fake.CurrentAllocations["C"].Should().BeApproximately(0.1730769M, PRECISION);
+            fake.CurrentAllocations["D"].Should().BeApproximately(0.4230769M, PRECISION);
+            fake.CurrentAllocations["E"].Should().BeApproximately(0.2307692M, PRECISION);
+            fake.CurrentAllocations["F"].Should().BeApproximately(0.1730769M, PRECISION);
         }
     }
 }

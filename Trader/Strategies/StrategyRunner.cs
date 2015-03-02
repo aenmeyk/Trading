@@ -15,7 +15,8 @@ namespace Trader.Strategies
 
         private IEnumerable<StrategyBase> _strategies = new StrategyBase[]
         {
-            new SP500Benchmark()
+            new SP500Benchmark(),
+            new ActualAllocationRebalanceByDeposit()
         };
 
         public void Run()
@@ -25,6 +26,7 @@ namespace Trader.Strategies
             var startDate = priceHistoryDictionary.Min(x => x.Key);
             var endDate = priceHistoryDictionary.Max(x => x.Key);
             var mostRecentYearTaxesPaid = startDate.Year;
+            UpdateMarket(startDate, priceHistoryDictionary[startDate]);
 
             foreach (var strategy in _strategies)
             {

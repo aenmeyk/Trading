@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Trader.Domain;
 
@@ -30,29 +32,51 @@ namespace Trader.Strategies
                 }
             }
 
-            var allocationsBelowDesiredValue = currentValues
-                .Where(x => x.Value < desiredValues[x.Key]);
+            var deficits = currentValues
+                .Where(x => x.Value < desiredValues[x.Key])
+                .Select(x => new { Symbol = x.Key, Deficit = desiredValues[x.Key] - x.Value })
+                .OrderByDescending(x => x.Deficit);
 
-            var symbolsBelowDesiredValue = allocationsBelowDesiredValue
-                .Select(x => x.Key);
+            var symbolsInPlay = new Collection<string>();
+            var amountsToBuy = new Dictionary<string, decimal>();
+            var nextItemIndex = 1;
+            var cashAvailableToTrade = Account.CashAvailableToTrade;
 
-            var totalPercentBelowDesired = Allocations
-                .Where(x => symbolsBelowDesiredValue.Contains(x.Key))
-                .Sum(x => x.Value);
-
-            var totalAmountBelowDesired = allocationsBelowDesiredValue
-                .Sum(x => x.Value);
-
-            var totalFundsInPlay = Account.CashAvailableToTrade + totalAmountBelowDesired;
-
-            foreach (var symbol in symbolsBelowDesiredValue)
+            foreach (var deficit in deficits)
             {
-                var percentOfTotalBelowDesired = Allocations[symbol] / totalPercentBelowDesired;
-                var desiredAmount = percentOfTotalBelowDesired * totalFundsInPlay;
-                var currentAmount = currentValues[symbol];
-                var amountToBuy = desiredAmount - currentAmount;
+                symbolsInPlay.Add(deficit.Symbol);
+                var currentItemDeficit = deficit.Deficit;
+                var amountToBuy = 0M;
 
-                Account.Buy(symbol, amountToBuy);
+                if (nextItemIndex < deficits.Count())
+                {
+                    var nextItemDeficit = deficits.ElementAt(nextItemIndex).Deficit;
+                    amountToBuy = Math.Min(cashAvailableToTrade / symbolsInPlay.Count(), currentItemDeficit - nextItemDeficit);
+                }
+                else
+                {
+                    amountToBuy = cashAvailableToTrade / symbolsInPlay.Count();
+                }
+
+                foreach (var symbol in symbolsInPlay)
+                {
+                    if (amountsToBuy.ContainsKey(symbol))
+                    {
+                        amountsToBuy[symbol] += amountToBuy;
+                    }
+                    else
+                    {
+                        amountsToBuy.Add(symbol, amountToBuy);
+                    }
+                }
+
+                cashAvailableToTrade -= amountToBuy * symbolsInPlay.Count();
+                nextItemIndex++;
+            }
+
+            foreach (var amountToBuy in amountsToBuy)
+            {
+                Account.Buy(amountToBuy.Key, amountToBuy.Value);
             }
         }
     }

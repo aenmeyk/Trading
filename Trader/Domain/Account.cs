@@ -49,7 +49,7 @@ namespace Trader.Domain
 
         public decimal CashAvailableToTrade
         {
-            get { return _cashValue - _taxesDue; }
+            get { return _cash - _taxesDue; }
         }
 
         public bool AllowPartialholdings { get; set; }
@@ -126,7 +126,7 @@ namespace Trader.Domain
         public void PayTaxes()
         {
             TaxesPaid += _taxesDue;
-            _cashValue -= _taxesDue;
+            _cash -= _taxesDue;
             _shortTermTaxableAmount = 0;
             _longTermTaxableAmount = 0;
         }

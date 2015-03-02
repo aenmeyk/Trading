@@ -4,10 +4,10 @@ namespace Common
 {
     public static class GeneralSettings
     {
-        public const decimal OPENING_BALANCE = 1000M;
-        public const decimal CONTRIBUTION = 0M;
+        public const decimal OPENING_BALANCE = 10000M;
+        public const decimal CONTRIBUTION = 1000M;
 
-        public static DateTime START_DATE = new DateTime(1996, 4, 1);
+        public static DateTime START_DATE = new DateTime(2011, 1, 13);
         public static DateTime END_DATE = new DateTime(2016, 12, 31);
 
         public const decimal TRADING_FEE = 8.95M;
