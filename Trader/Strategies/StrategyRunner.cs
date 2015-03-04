@@ -16,17 +16,20 @@ namespace Trader.Strategies
         private IEnumerable<StrategyBase> _strategies = new StrategyBase[]
         {
             new SP500Benchmark(),
-            new ActualAllocationRebalanceByDeposit()
+            //new ActualAllocationRebalanceByDeposit(),
+            //new ActualFixedAllocation(),
+            new BuyLoser()
         };
 
         public void Run()
         {
             GetStock();
-            var priceHistoryDictionary = GetPriceHistoryDictionary();
-            var startDate = priceHistoryDictionary.Min(x => x.Key);
-            var endDate = priceHistoryDictionary.Max(x => x.Key);
+            GetPriceHistoryDictionary();
+            var startDate = Market.HistoricalQuoteDictionary.Min(x => x.Key);
+            var endDate = Market.HistoricalQuoteDictionary.Max(x => x.Key);
             var mostRecentYearTaxesPaid = startDate.Year;
-            UpdateMarket(startDate, priceHistoryDictionary[startDate]);
+            Market.QuoteDictionary = Market.HistoricalQuoteDictionary[startDate];
+            Market.Today = startDate;
 
             foreach (var strategy in _strategies)
             {
@@ -34,9 +37,10 @@ namespace Trader.Strategies
                 strategy.DepositCash(GeneralSettings.OPENING_BALANCE);
             }
 
-            foreach (var date in priceHistoryDictionary.Keys.OrderBy(x => x))
+            foreach (var date in Market.HistoricalQuoteDictionary.Keys.OrderBy(x => x))
             {
-                UpdateMarket(date, priceHistoryDictionary[date]);
+                Market.QuoteDictionary = Market.HistoricalQuoteDictionary[date];
+                Market.Today = date;
                 var endOfMonth = new DateTime(Market.Today.Year, Market.Today.Month, DateTime.DaysInMonth(Market.Today.Year, Market.Today.Month));
                 var endOfYear = new DateTime(Market.Today.Year, 12, 31);
 
@@ -77,7 +81,7 @@ namespace Trader.Strategies
             Market.StockDictionary = stocks.ToDictionary(x => x.Symbol);
         }
 
-        private Dictionary<DateTime, IEnumerable<PriceHistory>> GetPriceHistoryDictionary()
+        private void GetPriceHistoryDictionary()
         {
             var symbols = _strategies.SelectMany(x => x.Symbols);
             var quotes = _priceHistoryRepository.GetForSymbolsAndDateRange<PriceHistory>(symbols, GeneralSettings.START_DATE, GeneralSettings.END_DATE);
@@ -85,22 +89,21 @@ namespace Trader.Strategies
                 .GroupBy(x => x.DateValue)
                 .ToDictionary(g => g.Key, g => g.Select(x => x));
 
-            return groupByDate;
-        }
-
-        private void UpdateMarket(DateTime date, IEnumerable<PriceHistory> priceHistories)
-        {
-            Market.QuoteDictionary.Clear();
-
-            foreach (var priceHistory in priceHistories)
+            foreach (var dateItem in groupByDate)
             {
-                var symbol = priceHistory.Symbol;
-                var stock = Market.StockDictionary[symbol];
-                var quote = new Quote(stock, priceHistory);
-                Market.QuoteDictionary.Add(symbol, quote);
-            }
+                var quoteDictionary = new Dictionary<string, Quote>();
 
-            Market.Today = date;
+                foreach (var priceHistory in dateItem.Value)
+                {
+                    var symbol = priceHistory.Symbol;
+                    var stock = Market.StockDictionary[symbol];
+                    var quote = new Quote(stock, priceHistory);
+
+                    quoteDictionary.Add(symbol, quote);
+                }
+
+                Market.HistoricalQuoteDictionary.Add(dateItem.Key, quoteDictionary);
+            }
         }
     }
 }

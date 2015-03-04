@@ -22,7 +22,37 @@ namespace Trader.Strategies
 
         public virtual IEnumerable<string> Symbols
         {
-            get { return new string[0]; }
+            get
+            {
+                return new[]
+                {
+"RPV",
+"RPG",
+"PKW",
+"PDP",
+"PID",
+"RFV",
+"GXC",
+"CWI",
+"DEF",
+"GMF",
+"XLG",
+"FEU",
+"MDYG",
+"SLYG",
+"RFG",
+"SLYV",
+"BIK",
+"PXSV",
+"RZG",
+"RZV",
+"MDYV",
+"PAF",
+"WMCR",
+"JPP",
+"RSCO",
+                };
+            }
         }
 
         public virtual void DepositCash(decimal amount)

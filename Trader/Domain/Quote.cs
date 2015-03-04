@@ -37,7 +37,7 @@ namespace Trader.Domain
 
         private decimal _spreadValue
         {
-            get { return _adjustedClosePrice * Stock.Spread; }
+            get { return _adjustedClosePrice * (Stock.Spread / 2); }
         }
     }
 }

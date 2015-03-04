@@ -49,7 +49,11 @@ namespace Trader.Domain
 
         public decimal CashAvailableToTrade
         {
-            get { return _cash - _taxesDue; }
+            get
+            {
+                var cashReservedForTaxes = _taxesDue > 0 ? _taxesDue : 0;
+                return _cash - cashReservedForTaxes;
+            }
         }
 
         public bool AllowPartialholdings { get; set; }
@@ -138,9 +142,10 @@ namespace Trader.Domain
             //var annualGrowth = GetAnnualGrowth(currentDate);
 
             //Console.WriteLine("Opening Balance: {0,12:n}", _openingBalance);
-            Console.WriteLine("Closing Value:\t{0,12:n}", Value);
-            Console.WriteLine("Taxes:\t\t{0,12:n}", TaxesPaid + _taxesDue);
-            Console.WriteLine("Fees:\t\t{0,12:n}", FeesPaid);
+            Console.WriteLine("Before tax & fees:\t{0,12:n}", Value + TaxesPaid + _taxesDue + FeesPaid);
+            Console.WriteLine("Taxes:\t\t\t{0,12:n}", TaxesPaid + _taxesDue);
+            Console.WriteLine("Fees:\t\t\t{0,12:n}", FeesPaid);
+            Console.WriteLine("Net:\t\t\t{0,12:n}", Value);
             //Console.WriteLine("Total Growth:    {0,14:p}", (TotalValue / _openingBalance) - 1);
             //Console.WriteLine("Annual Growth:   {0,14:p}", annualGrowth);
         }

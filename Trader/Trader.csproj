@@ -52,7 +52,10 @@
     <Compile Include="Domain\Quote.cs" />
     <Compile Include="Domain\TradeAction.cs" />
     <Compile Include="Domain\Transaction.cs" />
+    <Compile Include="Strategies\ActualFixedAllocation.cs" />
     <Compile Include="Strategies\ActualAllocationRebalanceByDeposit.cs" />
+    <Compile Include="Strategies\FixedAllocationBase.cs" />
+    <Compile Include="Strategies\BuyLoser.cs" />
     <Compile Include="Strategies\RebalanceByDepositBase.cs" />
     <Compile Include="Strategies\SP500Benchmark.cs" />
     <Compile Include="Strategies\StrategyBase.cs" />
