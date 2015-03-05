@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Common;
 using Trader.Domain;
 
@@ -7,11 +8,12 @@ namespace Trader.Strategies
 {
     public abstract class StrategyBase
     {
-        protected abstract string Name { get; }
-        protected Account Account { get; set; }
+        public abstract string Name { get; }
+        public Account Account { get; protected set; }
 
         public virtual void Initialize()
         {
+            //Account = new Account(0, 0);
             Account = new Account(GeneralSettings.SHORT_TERM_TAX_RATE, GeneralSettings.LONG_TERM_TAX_RATE);
         }
 
@@ -26,33 +28,26 @@ namespace Trader.Strategies
             {
                 return new[]
                 {
-"RPV",
-"RPG",
-"PKW",
-"PDP",
-"PID",
-"RFV",
-"GXC",
-"CWI",
-"DEF",
-"GMF",
-"XLG",
-"FEU",
-"MDYG",
-"SLYG",
-"RFG",
-"SLYV",
-"BIK",
-"PXSV",
-"RZG",
-"RZV",
-"MDYV",
-"PAF",
-"WMCR",
-"JPP",
-"RSCO",
+"XPH",
+"MDY",
+"EWO",
+"FBT",
+"EWM",
+"EWA",
+"IBB",
+"PJP",
+"EEH",
+"EWZ",
+"BBH",
+"DOD",
+"SIJ",
                 };
             }
+        }
+
+        protected virtual IEnumerable<string> AvailableSymbols
+        {
+            get { return Symbols.Where(x => Market.QuoteDictionary.Keys.Contains(x)); }
         }
 
         public virtual void DepositCash(decimal amount)

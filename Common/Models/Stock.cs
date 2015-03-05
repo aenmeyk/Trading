@@ -26,7 +26,12 @@
         public bool IsIndex { get; set; }
         public decimal TradingFee
         {
-            get { return SchwabOneSource || IsIndex ? 0 : GeneralSettings.TRADING_FEE; }
+            get
+            {
+                return SchwabOneSource || IsIndex || GeneralSettings.IGNORE_TRADING_FEE 
+                    ? 0
+                    : GeneralSettings.TRADING_FEE;
+            }
         }
     }
 }

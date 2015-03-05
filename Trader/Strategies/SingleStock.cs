@@ -5,16 +5,22 @@ using Trader.Domain;
 
 namespace Trader.Strategies
 {
-    public class SP500Benchmark : StrategyBase
+    public class SingleStock : StrategyBase
     {
-        protected override string Name
+        private string _symbol;
+        public SingleStock(string symbol)
         {
-            get { return "S&P 500 Benchmark"; }
+            _symbol = symbol;
+        }
+
+        public override string Name
+        {
+            get { return _symbol; }
         }
 
         public override IEnumerable<string> Symbols
         {
-            get { return SymbolLists.SP500; }
+            get { return new[] { _symbol }; }
         }
 
         public override void Initialize()
@@ -25,7 +31,7 @@ namespace Trader.Strategies
 
         protected override void ExecuteStrategyImplementation()
         {
-            var symbol = Symbols.Single();
+            var symbol = AvailableSymbols.Single();
             Account.Buy(symbol);
         }
     }

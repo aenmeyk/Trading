@@ -21,7 +21,7 @@ namespace Trader.Strategies
             }
         }
 
-        protected override string Name
+        public override string Name
         {
             get { return "Actual Fixed Allocation"; }
         }

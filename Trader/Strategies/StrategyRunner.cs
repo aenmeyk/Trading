@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Common;
 using Common.Models;
 using DataAccess.Repositories;
@@ -10,14 +12,16 @@ namespace Trader.Strategies
 {
     public class StrategyRunner
     {
+        private string _logPath = @"F:\Temp\History.csv";
         private StockRepository _stockRepository = new StockRepository();
         private PriceHistoryRepositoryBase _priceHistoryRepository = new PriceHistoryYahooRepository();
 
         private IEnumerable<StrategyBase> _strategies = new StrategyBase[]
         {
-            new SP500Benchmark(),
+            new SingleStock("^GSPC"),
             //new ActualAllocationRebalanceByDeposit(),
             //new ActualFixedAllocation(),
+            new EvenAllocation(),
             new BuyLoser()
         };
 
@@ -30,11 +34,13 @@ namespace Trader.Strategies
             var mostRecentYearTaxesPaid = startDate.Year;
             Market.QuoteDictionary = Market.HistoricalQuoteDictionary[startDate];
             Market.Today = startDate;
+            var logBuilder = new StringBuilder("Date");
 
             foreach (var strategy in _strategies)
             {
                 strategy.Initialize();
                 strategy.DepositCash(GeneralSettings.OPENING_BALANCE);
+                logBuilder.Append("," + strategy.Name);
             }
 
             foreach (var date in Market.HistoricalQuoteDictionary.Keys.OrderBy(x => x))
@@ -62,9 +68,13 @@ namespace Trader.Strategies
                     }
                 }
 
+                logBuilder.AppendLine();
+                logBuilder.Append(date.ToShortDateString());
+
                 foreach (var strategy in _strategies)
                 {
                     strategy.ExecuteStrategy();
+                    logBuilder.Append("," + strategy.Account.Value);
                 }
             }
 
@@ -73,6 +83,8 @@ namespace Trader.Strategies
                 strategy.Close();
                 strategy.PrintResult();
             }
+
+            WriteLogFile(logBuilder);
         }
 
         private void GetStock()
@@ -103,6 +115,14 @@ namespace Trader.Strategies
                 }
 
                 Market.HistoricalQuoteDictionary.Add(dateItem.Key, quoteDictionary);
+            }
+        }
+
+        private void WriteLogFile(StringBuilder logBuilder)
+        {
+            using (StreamWriter outfile = new StreamWriter(_logPath, false))
+            {
+                outfile.Write(logBuilder.ToString());
             }
         }
     }

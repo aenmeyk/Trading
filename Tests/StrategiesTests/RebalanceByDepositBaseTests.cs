@@ -25,7 +25,7 @@ namespace Tests.StrategiesTests
                 get { return _allocations; }
             }
 
-            protected override string Name
+            public override string Name
             {
                 get { return "Stub"; }
             }
